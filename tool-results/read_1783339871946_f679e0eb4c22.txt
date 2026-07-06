@@ -1,0 +1,701 @@
+     1→'use client'
+     2→
+     3→import {
+     4→  useState,
+     5→  useEffect,
+     6→  useCallback,
+     7→  useRef,
+     8→  useMemo,
+     9→} from 'react'
+    10→import { motion, AnimatePresence } from 'framer-motion'
+    11→import {
+    12→  X,
+    13→  ChevronLeft,
+    14→  ChevronRight,
+    15→  Volume2,
+    16→  VolumeX,
+    17→  ExternalLink,
+    18→} from 'lucide-react'
+    19→import { useNavigation } from '@/store/navigation'
+    20→import {
+    21→  portfolio,
+    22→  getRelatedProjects,
+    23→  getProjectBySlug,
+    24→  getProjectById,
+    25→  getProjectsByCategory,
+    26→  type PortfolioProject,
+    27→} from '@/data/portfolio'
+    28→
+    29→/* ═══════════════════════════════════════════════════════════════
+    30→   PREMIUM EASING
+    31→   ═══════════════════════════════════════════════════════════════ */
+    32→
+    33→const ease = [0.22, 1, 0.36, 1] as const
+    34→
+    35→/* ═══════════════════════════════════════════════════════════════
+    36→   FILMSTRIP ITEM
+    37→   ═══════════════════════════════════════════════════════════════ */
+    38→
+    39→function FilmstripItem({
+    40→  project,
+    41→  isActive,
+    42→  onClick,
+    43→}: {
+    44→  project: PortfolioProject
+    45→  isActive: boolean
+    46→  onClick: () => void
+    47→}) {
+    48→  const videoRef = useRef<HTMLVideoElement>(null)
+    49→  const [hovered, setHovered] = useState(false)
+    50→
+    51→  useEffect(() => {
+    52→    if (hovered && videoRef.current) {
+    53→      videoRef.current.play().catch(() => {})
+    54→    } else if (videoRef.current) {
+    55→      videoRef.current.pause()
+    56→      videoRef.current.currentTime = 0
+    57→    }
+    58→  }, [hovered])
+    59→
+    60→  return (
+    61→    <button
+    62→      onClick={onClick}
+    63→      onMouseEnter={() => setHovered(true)}
+    64→      onMouseLeave={() => setHovered(false)}
+    65→      data-active={isActive ? 'true' : undefined}
+    66→      className={`flex-shrink-0 relative overflow-hidden transition-all duration-500 ease-out cursor-pointer ${
+    67→        isActive
+    68→          ? 'ring-2 ring-electric-blue/80 shadow-[0_0_20px_rgba(37,99,235,0.2)]'
+    69→          : 'ring-1 ring-white/[0.08] hover:ring-white/25'
+    70→      }`}
+    71→      style={{
+    72→        aspectRatio: '16/9',
+    73→        borderRadius: '10px',
+    74→        width: isActive ? '11.5rem' : '9.5rem',
+    75→      }}
+    76→      aria-label={project.title}
+    77→    >
+    78→      {/* Base: thumbnail */}
+    79→      <img
+    80→        src={project.thumbnail}
+    81→        alt=""
+    82→        className="absolute inset-0 w-full h-full object-cover transition-opacity duration-600"
+    83→        style={{ opacity: hovered ? 0 : 1 }}
+    84→        loading="lazy"
+    85→      />
+    86→      {/* Hover: video preview */}
+    87→      <video
+    88→        ref={videoRef}
+    89→        src={project.video}
+    90→        muted
+    91→        loop
+    92→        playsInline
+    93→        preload="none"
+    94→        className="absolute inset-0 w-full h-full object-cover transition-opacity duration-600"
+    95→        style={{ opacity: hovered ? 1 : 0 }}
+    96→      />
+    97→      {/* Bottom gradient + label */}
+    98→      <div className="absolute bottom-0 inset-x-0 h-2/3 bg-gradient-to-t from-black/80 via-black/30 to-transparent pointer-events-none" />
+    99→      <div className="absolute bottom-0 left-0 right-0 px-2.5 py-2 pointer-events-none">
+   100→        <p
+   101→          className={`font-medium truncate transition-colors duration-300 ${
+   102→            isActive
+   103→              ? 'text-electric-blue text-[10px] md:text-[11px]'
+   104→              : 'text-white/70 text-[9px] md:text-[10px]'
+   105→          }`}
+   106→        >
+   107→          {project.title}
+   108→        </p>
+   109→        {!isActive && (
+   110→          <p className="text-white/30 text-[8px] md:text-[9px] mt-0.5 truncate">
+   111→            {project.category}
+   112→          </p>
+   113→        )}
+   114→      </div>
+   115→    </button>
+   116→  )
+   117→}
+   118→
+   119→/* ═══════════════════════════════════════════════════════════════
+   120→   CTA BUTTON
+   121→   ═══════════════════════════════════════════════════════════════ */
+   122→
+   123→function BookCTA() {
+   124→  return (
+   125→    <a
+   126→      href="https://calendly.com/salomeaicreate/sreallabs-discovery-call"
+   127→      target="_blank"
+   128→      rel="noopener noreferrer"
+   129→      className="inline-flex items-center gap-2 bg-electric-blue hover:bg-electric-blue/85 text-white text-xs font-medium px-5 py-2.5 rounded-full transition-all duration-300 hover:shadow-[0_0_20px_rgba(37,99,235,0.3)]"
+   130→    >
+   131→      Book Similar Project
+   132→      <ExternalLink className="w-3 h-3 opacity-70" />
+   133→    </a>
+   134→  )
+   135→}
+   136→
+   137→/* ═══════════════════════════════════════════════════════════════
+   138→   PORTFOLIO VIEWER
+   139→   ═══════════════════════════════════════════════════════════════ */
+   140→
+   141→export default function ProjectViewer() {
+   142→  const {
+   143→    selectedProjectId,
+   144→    selectedProjectSlug,
+   145→    closeProject,
+   146→    openProject,
+   147→    replaceProject,
+   148→  } = useNavigation()
+   149→
+   150→  // Resolve project
+   151→  const project = useMemo(() => {
+   152→    if (selectedProjectId) return getProjectById(selectedProjectId)
+   153→    if (selectedProjectSlug) return getProjectBySlug(selectedProjectSlug)
+   154→    return undefined
+   155→  }, [selectedProjectId, selectedProjectSlug])
+   156→
+   157→  const isViewerOpen = !!project
+   158→  const projectIndex = project
+   159→    ? portfolio.findIndex((p) => p.id === project.id)
+   160→    : -1
+   161→
+   162→  // ─── Local UI state ───
+   163→  const [isMuted, setIsMuted] = useState(true)
+   164→  const [animDirection, setAnimDirection] = useState(0)
+   165→  const mainVideoRef = useRef<HTMLVideoElement>(null)
+   166→  const filmstripRef = useRef<HTMLDivElement>(null)
+   167→  const viewerScrollRef = useRef<HTMLDivElement>(null)
+   168→
+   169→  // ─── Touch tracking for mobile swipe ───
+   170→  const touchStartX = useRef(0)
+   171→  const touchStartY = useRef(0)
+   172→  const isSwiping = useRef(false)
+   173→
+   174→  // ─── Track if this is the first project in this viewer session ───
+   175→  const isFirstOpen = useRef(true)
+   176→
+   177→  // ─── Filmstrip: same-category first, then fill from others ───
+   178→  const filmstripProjects = useMemo(() => {
+   179→    if (!project) return []
+   180→    const cat = project.category as 'All' | '3D Product Animation' | 'Beauty' | 'Technology' | 'Luxury' | 'SaaS' | 'AI UGC'
+   181→    const sameCategory = getProjectsByCategory(cat).filter(
+   182→      (p) => p.id !== project.id
+   183→    )
+   184→    const others = portfolio.filter(
+   185→      (p) =>
+   186→        p.id !== project.id &&
+   187→        !sameCategory.find((s) => s.id === p.id) &&
+   188→        !p.id.startsWith('featured')
+   189→    )
+   190→    const shuffled = [...others].sort(() => Math.random() - 0.5)
+   191→    return [...sameCategory, ...shuffled].slice(0, 10)
+   192→  }, [project])
+   193→
+   194→  // ─── Related projects: same category, not duplicated with filmstrip ───
+   195→  const relatedProjects = useMemo(() => {
+   196→    if (!project) return []
+   197→    const cat = project.category as 'All' | '3D Product Animation' | 'Beauty' | 'Technology' | 'Luxury' | 'SaaS' | 'AI UGC'
+   198→    const all = getProjectsByCategory(cat).filter((p) => p.id !== project.id)
+   199→    const manualRelated = getRelatedProjects(project)
+   200→    const combined = [
+   201→      ...new Map([...manualRelated, ...all].map((p) => [p.id, p])).values(),
+   202→    ]
+   203→    const filmstripIds = new Set(filmstripProjects.slice(0, 5).map((p) => p.id))
+   204→    return combined.filter((p) => !filmstripIds.has(p.id)).slice(0, 4)
+   205→  }, [project, filmstripProjects])
+   206→
+   207→  // ─── Push history + URL when opening the first project ───
+   208→  useEffect(() => {
+   209→    if (!project) return
+   210→    const url = `/work/${project.slug}`
+   211→    if (isFirstOpen.current) {
+   212→      // First open: push a new history entry
+   213→      window.history.pushState(
+   214→        { type: 'project', projectId: project.id },
+   215→        '',
+   216→        url
+   217→      )
+   218→      isFirstOpen.current = false
+   219→    } else {
+   220→      // Navigating between projects: replace current entry
+   221→      window.history.replaceState(
+   222→        { type: 'project', projectId: project.id },
+   223→        '',
+   224→        url
+   225→      )
+   226→    }
+   227→  }, [project?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+   228→
+   229→  // Reset first-open flag when viewer closes
+   230→  useEffect(() => {
+   231→    if (!isViewerOpen) {
+   232→      isFirstOpen.current = true
+   233→    }
+   234→  }, [isViewerOpen])
+   235→
+   236→  // ─── Navigate to a project (with animation direction) ───
+   237→  const navigateToProject = useCallback(
+   238→    (targetProject: PortfolioProject, direction: number) => {
+   239→      setAnimDirection(direction)
+   240→      setIsMuted(true)
+   241→      replaceProject(targetProject.id)
+   242→    },
+   243→    [replaceProject]
+   244→  )
+   245→
+   246→  // ─── Initial open (from grid card click) ───
+   247→  const handleInitialOpen = useCallback(
+   248→    (projectId: string) => {
+   249→      setAnimDirection(0)
+   250→      setIsMuted(true)
+   251→      openProject(projectId)
+   252→    },
+   253→    [openProject]
+   254→  )
+   255→
+   256→  const goPrev = useCallback(() => {
+   257→    if (projectIndex > 0) {
+   258→      setAnimDirection(-1)
+   259→      setIsMuted(true)
+   260→      replaceProject(portfolio[projectIndex - 1].id)
+   261→    }
+   262→  }, [projectIndex, replaceProject])
+   263→
+   264→  const goNext = useCallback(() => {
+   265→    if (projectIndex < portfolio.length - 1) {
+   266→      setAnimDirection(1)
+   267→      setIsMuted(true)
+   268→      replaceProject(portfolio[projectIndex + 1].id)
+   269→    }
+   270→  }, [projectIndex, replaceProject])
+   271→
+   272→  // ─── Close handler: back to page via history ───
+   273→  const handleClose = useCallback(() => {
+   274→    if (typeof window !== 'undefined' && window.history.length > 1) {
+   275→      window.history.back()
+   276→    } else {
+   277→      // No history to go back to (e.g. direct URL load)
+   278→      window.history.replaceState(null, '', '/work')
+   279→      closeProject()
+   280→    }
+   281→  }, [closeProject])
+   282→
+   283→  // ─── Keyboard navigation ───
+   284→  useEffect(() => {
+   285→    if (!isViewerOpen) return
+   286→    const handleKey = (e: KeyboardEvent) => {
+   287→      if (e.key === 'Escape') {
+   288→        e.preventDefault()
+   289→        handleClose()
+   290→      }
+   291→      if (e.key === 'ArrowLeft') goPrev()
+   292→      if (e.key === 'ArrowRight') goNext()
+   293→    }
+   294→    window.addEventListener('keydown', handleKey)
+   295→    return () => window.removeEventListener('keydown', handleKey)
+   296→  }, [isViewerOpen, handleClose, goPrev, goNext])
+   297→
+   298→  // ─── Popstate: handle back/forward and deep links ───
+   299→  useEffect(() => {
+   300→    if (typeof window === 'undefined') return
+   301→
+   302→    const handlePopState = (e: PopStateEvent) => {
+   303→      const state = e.state
+   304→      if (state?.type === 'project' && state.projectId) {
+   305→        // Navigating back/forward to a project
+   306→        const proj = getProjectById(state.projectId)
+   307→        if (proj) {
+   308→          setAnimDirection(0)
+   309→          setIsMuted(true)
+   310→          // Use setState directly to avoid pushing history again
+   311→          useNavigation.setState({
+   312→            selectedProjectId: state.projectId,
+   313→            selectedProjectSlug: null,
+   314→          })
+   315→          isFirstOpen.current = false
+   316→        }
+   317→      } else {
+   318→        // Navigating away from the viewer — close it
+   319→        closeProject()
+   320→      }
+   321→    }
+   322→
+   323→    window.addEventListener('popstate', handlePopState)
+   324→    return () => window.removeEventListener('popstate', handlePopState)
+   325→  }, [closeProject])
+   326→
+   327→  // ─── Deep link: resolve /work/slug on page load ───
+   328→  useEffect(() => {
+   329→    if (typeof window === 'undefined') return
+   330→    const path = window.location.pathname
+   331→    if (path.startsWith('/work/')) {
+   332→      const slug = path.replace('/work/', '')
+   333→      const found = getProjectBySlug(decodeURIComponent(slug))
+   334→      if (found) {
+   335→        window.history.replaceState(
+   336→          { type: 'project', projectId: found.id },
+   337→          '',
+   338→          path
+   339→        )
+   340→        useNavigation.setState({
+   341→          selectedProjectId: found.id,
+   342→          selectedProjectSlug: null,
+   343→          previousPage: 'work',
+   344→        })
+   345→        isFirstOpen.current = false // Already has history from replaceState
+   346→        document.body.style.overflow = 'hidden'
+   347→      }
+   348→    }
+   349→  }, [])
+   350→
+   351→  // ─── Scroll filmstrip to active item ───
+   352→  useEffect(() => {
+   353→    if (!filmstripRef.current || !project) return
+   354→    const activeEl = filmstripRef.current.querySelector('[data-active="true"]')
+   355→    if (activeEl) {
+   356→      activeEl.scrollIntoView({
+   357→        behavior: 'smooth',
+   358→        block: 'nearest',
+   359→        inline: 'center',
+   360→      })
+   361→    }
+   362→  }, [project])
+   363→
+   364→  // ─── Scroll viewer to top on project change ───
+   365→  useEffect(() => {
+   366→    if (viewerScrollRef.current) {
+   367→      viewerScrollRef.current.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior })
+   368→    }
+   369→  }, [project?.id])
+   370→
+   371→  // ─── Preload next project video for smooth transitions ───
+   372→  useEffect(() => {
+   373→    if (projectIndex < 0 || projectIndex >= portfolio.length - 1) return
+   374→    const nextVideo = portfolio[projectIndex + 1].video
+   375→    const link = document.createElement('link')
+   376→    link.rel = 'prefetch'
+   377→    link.as = 'video'
+   378→    link.href = nextVideo
+   379→    document.head.appendChild(link)
+   380→    return () => {
+   381→      try { document.head.removeChild(link) } catch {}
+   382→    }
+   383→  }, [projectIndex])
+   384→
+   385→  // ─── Touch handlers for mobile swipe ───
+   386→  const onTouchStart = (e: React.TouchEvent) => {
+   387→    touchStartX.current = e.touches[0].clientX
+   388→    touchStartY.current = e.touches[0].clientY
+   389→    isSwiping.current = false
+   390→  }
+   391→  const onTouchMove = (e: React.TouchEvent) => {
+   392→    const dx = e.touches[0].clientX - touchStartX.current
+   393→    const dy = e.touches[0].clientY - touchStartY.current
+   394→    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 30) {
+   395→      isSwiping.current = true
+   396→    }
+   397→  }
+   398→  const onTouchEnd = (e: React.TouchEvent) => {
+   399→    if (!isSwiping.current) return
+   400→    const dx = e.changedTouches[0].clientX - touchStartX.current
+   401→    if (dx < -60) goNext()
+   402→    else if (dx > 60) goPrev()
+   403→  }
+   404→
+   405→  // ─── Project counter ───
+   406→  const projectNumber = projectIndex >= 0 ? projectIndex + 1 : 0
+   407→  const totalProjects = portfolio.filter(p => !p.id.startsWith('featured')).length
+   408→
+   409→  return (
+   410→    <AnimatePresence>
+   411→      {isViewerOpen && project && (
+   412→        <motion.div
+   413→          key="portfolio-viewer"
+   414→          initial={{ opacity: 0 }}
+   415→          animate={{ opacity: 1 }}
+   416→          exit={{ opacity: 0 }}
+   417→          transition={{ duration: 0.35, ease }}
+   418→          className="fixed inset-0 z-[100] bg-black flex flex-col"
+   419→          ref={viewerScrollRef}
+   420→          style={{
+   421→            overflowY: 'auto',
+   422→            overflowX: 'hidden',
+   423→            overscrollBehavior: 'contain',
+   424→            WebkitOverflowScrolling: 'touch',
+   425→          }}
+   426→          onTouchStart={onTouchStart}
+   427→          onTouchMove={onTouchMove}
+   428→          onTouchEnd={onTouchEnd}
+   429→        >
+   430→          {/* ═══════════════════════════════════════════════
+   431→              TOP BAR: Close + Counter + Mute
+   432→              ═══════════════════════════════════════════════ */}
+   433→          <motion.div
+   434→            initial={{ opacity: 0, y: -10 }}
+   435→            animate={{ opacity: 1, y: 0 }}
+   436→            transition={{ delay: 0.15, duration: 0.3, ease }}
+   437→            className="flex-shrink-0 flex items-center justify-between px-5 md:px-8 h-12 z-[110]"
+   438→          >
+   439→            {/* Left: counter */}
+   440→            <div className="flex items-center gap-3">
+   441→              <span className="text-white/20 text-[11px] font-mono tabular-nums">
+   442→                {String(projectNumber).padStart(2, '0')} / {String(totalProjects).padStart(2, '0')}
+   443→              </span>
+   444→              <div className="w-px h-3 bg-white/10" />
+   445→              <span className="text-white/30 text-[10px] uppercase tracking-[0.15em] hidden sm:inline">
+   446→                {project.category}
+   447→              </span>
+   448→            </div>
+   449→
+   450→            {/* Right: mute + close */}
+   451→            <div className="flex items-center gap-2">
+   452→              <button
+   453→                onClick={() => setIsMuted(!isMuted)}
+   454→                className="w-8 h-8 flex items-center justify-center rounded-full text-white/40 hover:text-white/80 hover:bg-white/[0.06] transition-all duration-300"
+   455→                aria-label={isMuted ? 'Unmute' : 'Mute'}
+   456→              >
+   457→                {isMuted ? (
+   458→                  <VolumeX className="w-3.5 h-3.5" />
+   459→                ) : (
+   460→                  <Volume2 className="w-3.5 h-3.5" />
+   461→                )}
+   462→              </button>
+   463→              <button
+   464→                onClick={handleClose}
+   465→                className="w-8 h-8 flex items-center justify-center rounded-full text-white/40 hover:text-white hover:bg-white/[0.06] transition-all duration-300"
+   466→                aria-label="Close project viewer"
+   467→              >
+   468→                <X className="w-4 h-4" />
+   469→              </button>
+   470→            </div>
+   471→          </motion.div>
+   472→
+   473→          {/* ═══════════════════════════════════════════════
+   474→              SECTION 1: CINEMATIC VIDEO
+   475→              ═══════════════════════════════════════════════ */}
+   476→          <AnimatePresence mode="wait" custom={animDirection}>
+   477→            <motion.div
+   478→              key={project.id}
+   479→              custom={animDirection}
+   480→              variants={{
+   481→                enter: (dir: number) => ({
+   482→                  opacity: 0,
+   483→                  scale: 0.985,
+   484→                  transition: { duration: 0.25, ease },
+   485→                }),
+   486→                center: {
+   487→                  opacity: 1,
+   488→                  scale: 1,
+   489→                  transition: { duration: 0.35, ease },
+   490→                },
+   491→                exit: {
+   492→                  opacity: 0,
+   493→                  scale: 0.985,
+   494→                  transition: { duration: 0.2, ease },
+   495→                },
+   496→              }}
+   497→              initial="enter"
+   498→              animate="center"
+   499→              exit="exit"
+   500→              className="flex-shrink-0 w-full"
+   501→            >
+   502→              <div
+   503→                className="w-full mx-auto bg-black"
+   504→                style={{
+   505→                  maxWidth: '1400px',
+   506→                  aspectRatio: '16/9',
+   507→                  borderRadius: '0',
+   508→                  overflow: 'hidden',
+   509→                }}
+   510→              >
+   511→                <video
+   512→                  ref={mainVideoRef}
+   513→                  key={project.video}
+   514→                  src={project.video}
+   515→                  autoPlay
+   516→                  muted={isMuted}
+   517→                  loop
+   518→                  playsInline
+   519→                  className="w-full h-full object-contain"
+   520→                />
+   521→              </div>
+   522→            </motion.div>
+   523→          </AnimatePresence>
+   524→
+   525→          {/* ═══════════════════════════════════════════════
+   526→              SECTION 2: PROJECT INFORMATION
+   527→              ═══════════════════════════════════════════════ */}
+   528→          <AnimatePresence mode="wait">
+   529→            <motion.div
+   530→              key={`info-${project.id}`}
+   531→              initial={{ opacity: 0, y: 12 }}
+   532→              animate={{ opacity: 1, y: 0 }}
+   533→              exit={{ opacity: 0, y: -8 }}
+   534→              transition={{ duration: 0.3, delay: 0.1, ease }}
+   535→              className="w-full max-w-5xl mx-auto px-5 md:px-8 pt-7 md:pt-9 pb-5"
+   536→            >
+   537→              {/* Title + CTA row */}
+   538→              <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+   539→                <div>
+   540→                  <h2 className="text-xl md:text-2xl lg:text-[28px] font-semibold text-white tracking-tight leading-tight">
+   541→                    {project.title}
+   542→                  </h2>
+   543→                  <div className="flex items-center gap-2.5 mt-2.5">
+   544→                    <span className="text-electric-blue text-[11px] font-medium">
+   545→                      {project.category}
+   546→                    </span>
+   547→                    <span className="text-white/15">·</span>
+   548→                    <span className="text-matte-silver/80 text-[11px]">
+   549→                      {project.industry}
+   550→                    </span>
+   551→                    {project.year && (
+   552→                      <>
+   553→                        <span className="text-white/15">·</span>
+   554→                        <span className="text-matte-silver/50 text-[11px]">
+   555→                          {project.year}
+   556→                        </span>
+   557→                      </>
+   558→                    )}
+   559→                  </div>
+   560→                </div>
+   561→                <div className="flex-shrink-0 hidden md:block">
+   562→                  <BookCTA />
+   563→                </div>
+   564→              </div>
+   565→
+   566→              {/* Description */}
+   567→              <p className="text-matte-silver text-[13px] md:text-sm leading-[1.7] mt-5 max-w-3xl">
+   568→                {project.description}
+   569→              </p>
+   570→
+   571→              {/* Service + Tags */}
+   572→              <div className="flex flex-wrap items-center gap-2 mt-4">
+   573→                <span className="text-[9px] uppercase tracking-[0.12em] text-white/50 font-medium border border-white/[0.08] rounded-full px-3 py-1">
+   574→                  {project.service}
+   575→                </span>
+   576→                {project.tags?.slice(0, 3).map((tag) => (
+   577→                  <span
+   578→                    key={tag}
+   579→                    className="text-[9px] uppercase tracking-[0.12em] text-matte-silver/40 border border-white/[0.04] rounded-full px-3 py-1"
+   580→                  >
+   581→                    {tag}
+   582→                  </span>
+   583→                ))}
+   584→              </div>
+   585→
+   586→              {/* Mobile CTA */}
+   587→              <div className="mt-5 md:hidden">
+   588→                <BookCTA />
+   589→              </div>
+   590→            </motion.div>
+   591→          </AnimatePresence>
+   592→
+   593→          {/* ═══════════════════════════════════════════════
+   594→              SECTION 3: HORIZONTAL FILMSTRIP
+   595→              ═══════════════════════════════════════════════ */}
+   596→          <AnimatePresence>
+   597→            <motion.div
+   598→              key={`filmstrip-${project.id}`}
+   599→              initial={{ opacity: 0, x: 20 }}
+   600→              animate={{ opacity: 1, x: 0 }}
+   601→              exit={{ opacity: 0, x: 20 }}
+   602→              transition={{ duration: 0.35, delay: 0.2, ease }}
+   603→              className="w-full flex-shrink-0 py-5"
+   604→            >
+   605→              <div className="max-w-5xl mx-auto px-5 md:px-8 mb-3.5">
+   606→                <p className="text-[9px] uppercase tracking-[0.2em] text-white/20 font-medium">
+   607→                  Continue Exploring
+   608→                </p>
+   609→              </div>
+   610→
+   611→              <div
+   612→                ref={filmstripRef}
+   613→                className="flex gap-3 overflow-x-auto px-5 md:px-8 pb-2 scrollbar-hide"
+   614→                style={{ WebkitOverflowScrolling: 'touch' }}
+   615→              >
+   616→                {filmstripProjects.map((fp) => (
+   617→                  <FilmstripItem
+   618→                    key={fp.id}
+   619→                    project={fp}
+   620→                    isActive={fp.id === project.id}
+   621→                    onClick={() => navigateToProject(fp, 1)}
+   622→                  />
+   623→                ))}
+   624→              </div>
+   625→            </motion.div>
+   626→          </AnimatePresence>
+   627→
+   628→          {/* ═══════════════════════════════════════════════
+   629→              SECTION 4: RELATED PROJECTS
+   630→              ═══════════════════════════════════════════════ */}
+   631→          {relatedProjects.length > 0 && (
+   632→            <AnimatePresence>
+   633→              <motion.div
+   634→                key={`related-${project.id}`}
+   635→                initial={{ opacity: 0, y: 20 }}
+   636→                animate={{ opacity: 1, y: 0 }}
+   637→                exit={{ opacity: 0 }}
+   638→                transition={{ duration: 0.35, delay: 0.3, ease }}
+   639→                className="w-full max-w-5xl mx-auto px-5 md:px-8 pt-3 pb-14"
+   640→              >
+   641→                <p className="text-[9px] uppercase tracking-[0.2em] text-white/20 font-medium mb-3.5">
+   642→                  More in {project.category}
+   643→                </p>
+   644→
+   645→                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+   646→                  {relatedProjects.map((rp) => (
+   647→                    <button
+   648→                      key={rp.id}
+   649→                      onClick={() => navigateToProject(rp, 1)}
+   650→                      className="relative overflow-hidden group/rel cursor-pointer text-left"
+   651→                      style={{ aspectRatio: '16/9', borderRadius: '10px' }}
+   652→                      aria-label={rp.title}
+   653→                    >
+   654→                      <img
+   655→                        src={rp.thumbnail}
+   656→                        alt=""
+   657→                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover/rel:scale-[1.04]"
+   658→                        loading="lazy"
+   659→                      />
+   660→                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover/rel:opacity-100 transition-opacity duration-400" />
+   661→                      <div className="absolute bottom-0 left-0 right-0 px-2.5 py-2.5 pointer-events-none opacity-0 group-hover/rel:opacity-100 transition-opacity duration-300">
+   662→                        <p className="text-white text-[10px] md:text-[11px] font-medium truncate">
+   663→                          {rp.title}
+   664→                        </p>
+   665→                        <p className="text-white/40 text-[8px] md:text-[9px] mt-0.5">
+   666→                          {rp.category}
+   667→                        </p>
+   668→                      </div>
+   669→                    </button>
+   670→                  ))}
+   671→                </div>
+   672→              </motion.div>
+   673→            </AnimatePresence>
+   674→          )}
+   675→
+   676→          {/* ═══════════════════════════════════════════════
+   677→              PREV / NEXT NAVIGATION (overlay)
+   678→              ═══════════════════════════════════════════════ */}
+   679→          {projectIndex > 0 && (
+   680→            <button
+   681→              onClick={goPrev}
+   682→              className="fixed left-3 md:left-5 top-1/2 -translate-y-1/2 z-[110] w-11 h-11 flex items-center justify-center rounded-full bg-white/[0.04] hover:bg-white/[0.1] text-white/25 hover:text-white/70 transition-all duration-300 backdrop-blur-sm"
+   683→              aria-label="Previous project"
+   684→            >
+   685→              <ChevronLeft className="w-5 h-5" />
+   686→            </button>
+   687→          )}
+   688→          {projectIndex < portfolio.length - 1 && (
+   689→            <button
+   690→              onClick={goNext}
+   691→              className="fixed right-3 md:right-5 top-1/2 -translate-y-1/2 z-[110] w-11 h-11 flex items-center justify-center rounded-full bg-white/[0.04] hover:bg-white/[0.1] text-white/25 hover:text-white/70 transition-all duration-300 backdrop-blur-sm"
+   692→              aria-label="Next project"
+   693→            >
+   694→              <ChevronRight className="w-5 h-5" />
+   695→            </button>
+   696→          )}
+   697→        </motion.div>
+   698→      )}
+   699→    </AnimatePresence>
+   700→  )
+   701→}

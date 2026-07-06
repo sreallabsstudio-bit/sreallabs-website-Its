@@ -101,9 +101,9 @@ export default function ServicesPage() {
   const featuredProjects = getFeaturedProjects().slice(0, 6)
 
   return (
-    <div className="pt-16">
+    <div className="pt-[72px]">
       {/* ===== HERO ===== */}
-      <section className="py-20 md:py-28 bg-obsidian">
+      <section className="py-16 md:py-24 bg-obsidian">
         <div className="max-w-7xl mx-auto px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -122,7 +122,7 @@ export default function ServicesPage() {
       </section>
 
       {/* ===== INTRODUCTION ===== */}
-      <section className="py-16 md:py-20 bg-obsidian">
+      <section className="py-12 md:py-16 bg-obsidian">
         <div className="max-w-7xl mx-auto px-6">
           <div className="max-w-3xl">
             <AnimatedSection>
@@ -131,7 +131,7 @@ export default function ServicesPage() {
               </p>
             </AnimatedSection>
             <AnimatedSection delay={0.15}>
-              <p className="text-matte-silver text-base md:text-lg leading-relaxed mt-3">
+              <p className="text-matte-silver text-base md:text-lg leading-relaxed mt-2">
                 Whether you need a cinematic product reveal that stops scrollers in their tracks, an AI-powered commercial that scales across markets, or a SaaS explainer that turns complex features into compelling stories — we have the expertise, tools, and creative vision to deliver.
               </p>
             </AnimatedSection>
@@ -147,12 +147,12 @@ export default function ServicesPage() {
 
           return (
             <div key={service.title} className={i > 0 ? 'border-t border-white/[0.04]' : ''}>
-              <div className="py-16 md:py-20">
-                <div className={`max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center ${isReversed ? 'md:direction-rtl' : ''}`}>
+              <div className="py-12 md:py-16">
+                <div className={`max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 items-center ${isReversed ? 'md:direction-rtl' : ''}`}>
                   {/* Text Content */}
                   <AnimatedSection className={isReversed ? 'md:order-2' : ''}>
                     <div className={`flex items-center gap-3 mb-4 ${isReversed ? 'md:flex-row-reverse' : ''}`}>
-                      <div className="w-fit rounded-lg bg-electric-blue/10 p-3">
+                      <div className="w-fit rounded-lg bg-electric-blue/10 p-2.5">
                         <service.icon className="w-5 h-5 text-electric-blue" />
                       </div>
                       <span className="text-electric-blue text-xs uppercase tracking-[0.15em] font-medium">
@@ -167,7 +167,7 @@ export default function ServicesPage() {
                       {service.longDescription}
                     </p>
 
-                    <ul className="mt-6 space-y-3">
+                    <ul className="mt-4 space-y-2">
                       {service.features.map((feature) => (
                         <li key={feature} className="flex items-start gap-2.5">
                           <Check className="w-4 h-4 text-acid-lime mt-0.5 flex-shrink-0" />
@@ -178,7 +178,7 @@ export default function ServicesPage() {
 
                     <button
                       onClick={() => navigate('contact')}
-                      className="mt-8 inline-flex items-center gap-2 text-electric-blue text-sm font-medium hover:gap-3 transition-all"
+                      className="mt-5 inline-flex items-center gap-2 text-electric-blue text-sm font-medium hover:gap-3 transition-all"
                     >
                       Discuss This Service <ArrowRight className="w-4 h-4" />
                     </button>
@@ -221,14 +221,14 @@ export default function ServicesPage() {
       </section>
 
       {/* ===== FEATURED WORK ===== */}
-      <section className="py-16 md:py-20 bg-obsidian">
+      <section className="py-14 md:py-20 bg-obsidian">
         <div className="max-w-7xl mx-auto px-6">
           <SectionHeading
             title="Our Latest Work"
             subtitle="Recent projects across all service categories"
           />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mt-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5 mt-8">
             {featuredProjects.map((p) => (
               <AnimatedSection key={p.id}>
                 <PortfolioCard project={p} onClick={() => openProject(p.id)} />
@@ -236,7 +236,7 @@ export default function ServicesPage() {
             ))}
           </div>
 
-          <AnimatedSection className="mt-8">
+          <AnimatedSection className="mt-6">
             <button
               onClick={() => navigate('work')}
               className="inline-flex items-center gap-2 text-electric-blue text-sm font-medium hover:gap-3 transition-all"
@@ -248,16 +248,16 @@ export default function ServicesPage() {
       </section>
 
       {/* ===== PROCESS ===== */}
-      <section className="py-16 md:py-20 bg-surface-secondary">
+      <section className="py-14 md:py-20 bg-surface-secondary">
         <div className="max-w-7xl mx-auto px-6">
           <SectionHeading
             title="Our Process"
             subtitle="A proven approach that delivers results every time"
           />
 
-          <div className="mt-12">
+          <div className="mt-8">
             {/* Desktop Timeline */}
-            <div className="hidden md:grid grid-cols-4 gap-6 md:gap-8">
+            <div className="hidden md:grid grid-cols-4 gap-4 md:gap-6">
               {processSteps.map((step, i) => (
                 <AnimatedSection key={step.num} delay={i * 0.1}>
                   <div className="relative">
@@ -296,11 +296,11 @@ export default function ServicesPage() {
       </section>
 
       {/* ===== FAQ ===== */}
-      <section className="py-16 md:py-20 bg-obsidian">
+      <section className="py-14 md:py-20 bg-obsidian">
         <div className="max-w-3xl mx-auto px-6">
           <SectionHeading title="Service FAQ" />
 
-          <AnimatedSection className="mt-10" delay={0.15}>
+          <AnimatedSection className="mt-8" delay={0.15}>
             <Accordion type="single" collapsible className="w-full">
               {serviceFaqs.map((faq, i) => (
                 <AccordionItem
@@ -322,7 +322,7 @@ export default function ServicesPage() {
       </section>
 
       {/* ===== CTA ===== */}
-      <section className="py-16 md:py-20 bg-surface-secondary relative">
+      <section className="py-14 md:py-20 bg-surface-secondary relative">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(37,99,235,0.05)_0%,transparent_70%)] pointer-events-none" />
         <div className="relative max-w-2xl mx-auto px-6 text-center">
           <AnimatedSection>
@@ -332,7 +332,7 @@ export default function ServicesPage() {
             <p className="text-matte-silver mt-4 text-sm md:text-base leading-relaxed">
               Let&apos;s discuss your project and find the perfect creative solution. Every great project starts with a conversation.
             </p>
-            <div className="flex flex-wrap items-center justify-center gap-4 mt-8">
+            <div className="flex flex-wrap items-center justify-center gap-4 mt-6">
               <a
                 href={siteConfig.calendlyUrl}
                 target="_blank"

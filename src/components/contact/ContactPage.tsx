@@ -67,7 +67,7 @@ export default function ContactPage() {
   return (
     <main>
       {/* ===== HERO ===== */}
-      <section className="bg-obsidian py-20 md:py-28">
+      <section className="bg-obsidian py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-6">
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
@@ -81,7 +81,7 @@ export default function ContactPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1, ease: [0.25, 0.4, 0.25, 1] }}
-            className="text-matte-silver mt-3 text-lg md:text-xl"
+            className="text-matte-silver mt-2 text-lg md:text-xl"
           >
             Ready to bring your vision to life? We&apos;d love to hear from you.
           </motion.p>
@@ -89,12 +89,12 @@ export default function ContactPage() {
       </section>
 
       {/* ===== CONTACT INFO + FORM ===== */}
-      <section className="bg-obsidian py-16 md:py-20">
+      <section className="bg-obsidian py-14 md:py-20">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="grid md:grid-cols-2 gap-10 md:gap-16">
+          <div className="grid md:grid-cols-2 gap-8 md:gap-14">
             {/* Left: Contact details */}
             <AnimatedSection>
-              <div className="space-y-6">
+              <div className="space-y-5">
                 <div>
                   <h2 className="text-xl font-semibold text-white">Get in Touch</h2>
                   <p className="text-matte-silver text-sm mt-1">
@@ -151,7 +151,7 @@ export default function ContactPage() {
 
             {/* Right: Contact Form */}
             <AnimatedSection delay={0.1}>
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 {/* Name */}
                 <div className="space-y-1.5">
                   <Label htmlFor="name" className="text-white text-sm">
@@ -254,7 +254,7 @@ export default function ContactPage() {
       </section>
 
       {/* ===== CALENDLY SECTION ===== */}
-      <section className="bg-surface-secondary py-16 md:py-24">
+      <section className="bg-surface-secondary py-14 md:py-20">
         <div className="max-w-7xl mx-auto px-6">
           <AnimatedSection className="text-center max-w-2xl mx-auto">
             <h2 className="text-2xl md:text-3xl font-semibold text-white">
@@ -267,7 +267,7 @@ export default function ContactPage() {
               href={siteConfig.calendlyUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-8 inline-flex items-center gap-2 bg-electric-blue text-white px-8 py-4 rounded-full text-lg font-medium hover:bg-electric-blue/90 transition-colors"
+              className="mt-6 inline-flex items-center gap-2 bg-electric-blue text-white px-6 py-3 rounded-full text-sm font-medium hover:bg-electric-blue/90 transition-colors"
             >
               Book Discovery Call
             </a>
@@ -279,17 +279,17 @@ export default function ContactPage() {
       </section>
 
       {/* ===== SOCIAL LINKS ===== */}
-      <section className="bg-obsidian py-16 md:py-24">
+      <section className="bg-obsidian py-14 md:py-20">
         <div className="max-w-7xl mx-auto px-6">
           <SectionHeading title="Connect With Us" className="text-center" />
-          <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+          <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
             {socialCards.map((card, i) => (
               <AnimatedSection key={card.name} delay={0.1 + i * 0.1}>
                 <a
                   href={card.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block bg-surface-card rounded-xl p-6 border border-white/[0.06] text-center hover:border-electric-blue/30 transition-all group"
+                  className="block bg-surface-card rounded-xl p-5 border border-white/[0.06] text-center hover:border-electric-blue/30 transition-all group"
                 >
                   <card.icon className="w-6 h-6 text-matte-silver mx-auto group-hover:text-electric-blue transition-colors" />
                   <p className="text-white font-medium mt-3">{card.name}</p>
@@ -302,7 +302,7 @@ export default function ContactPage() {
       </section>
 
       {/* ===== FOOTER CTA ===== */}
-      <section className="bg-surface-secondary py-12 md:py-16">
+      <section className="bg-surface-secondary py-10 md:py-14">
         <div className="max-w-7xl mx-auto px-6 text-center">
           <p className="text-matte-silver text-sm">
             Prefer email?{' '}

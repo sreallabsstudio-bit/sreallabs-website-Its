@@ -110,7 +110,7 @@ const stagger = {
 }
 
 export default function HomePage() {
-  const { navigate, openProject } = useNavigation()
+  const { navigate, navigateToProject } = useNavigation()
   const [activeCategory, setActiveCategory] = useState<PortfolioCategory>('All')
 
   const featuredProjects = getFeaturedProjects().slice(0, 4)
@@ -158,7 +158,7 @@ export default function HomePage() {
             initial="hidden"
             animate="visible"
             variants={stagger}
-            className="text-matte-silver text-base md:text-lg mt-6 max-w-xl leading-relaxed"
+            className="text-matte-silver text-base md:text-lg mt-4 max-w-xl leading-relaxed"
           >
             We craft cinematic 3D product animations, AI commercials, and creative
             stories that make brands unforgettable.
@@ -169,7 +169,7 @@ export default function HomePage() {
             initial="hidden"
             animate="visible"
             variants={stagger}
-            className="flex flex-wrap gap-4 mt-8"
+            className="flex flex-wrap gap-4 mt-6"
           >
             <button
               onClick={() => navigate('work')}
@@ -190,25 +190,25 @@ export default function HomePage() {
       </section>
 
       {/* ===== FEATURED WORK ===== */}
-      <section className="py-16 md:py-20 lg:py-24 bg-obsidian">
+      <section className="py-14 md:py-20 bg-obsidian">
         <div className="max-w-7xl mx-auto px-6">
           <SectionHeading
             title="Featured Work"
             subtitle="Selected projects that define our craft"
           />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-10">
-            {featuredProjects.map((p) => (
-              <AnimatedSection key={p.id}>
-                <PortfolioCard
-                  project={p}
-                  onClick={() => openProject(p.id)}
-                />
-              </AnimatedSection>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-8">
+            {featuredProjects.map((p, i) => (
+              <PortfolioCard
+                key={p.id}
+                project={p}
+                onClick={() => navigateToProject(p.slug)}
+                index={i}
+              />
             ))}
           </div>
 
-          <AnimatedSection className="mt-8">
+          <AnimatedSection className="mt-6">
             <button
               onClick={() => navigate('work')}
               className="inline-flex items-center gap-2 text-electric-blue text-sm font-medium hover:gap-3 transition-all"
@@ -220,7 +220,7 @@ export default function HomePage() {
       </section>
 
       {/* ===== BROWSE BY CATEGORY ===== */}
-      <section className="py-16 md:py-20 lg:py-24 bg-surface-secondary">
+      <section className="py-14 md:py-20 bg-surface-secondary">
         <div className="max-w-7xl mx-auto px-6">
           <SectionHeading
             title="Browse by Category"
@@ -248,27 +248,27 @@ export default function HomePage() {
 
           {/* Project Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mt-8">
-            {filteredProjects.map((p) => (
-              <AnimatedSection key={p.id}>
-                <PortfolioCard
-                  project={p}
-                  onClick={() => openProject(p.id)}
-                />
-              </AnimatedSection>
+            {filteredProjects.map((p, i) => (
+              <PortfolioCard
+                key={p.id}
+                project={p}
+                onClick={() => navigateToProject(p.slug)}
+                index={i}
+              />
             ))}
           </div>
         </div>
       </section>
 
       {/* ===== WHY SREALLABS ===== */}
-      <section className="py-16 md:py-20 lg:py-24 bg-obsidian">
+      <section className="py-14 md:py-20 bg-obsidian">
         <div className="max-w-7xl mx-auto px-6">
           <SectionHeading title="Why SREALLABS" />
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mt-10">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mt-8">
             {whyCards.map((card, i) => (
               <AnimatedSection key={card.title} delay={i * 0.1}>
-                <div className="bg-surface-card rounded-xl p-6 md:p-8 border border-white/[0.06] h-full">
+                <div className="bg-surface-card rounded-xl p-5 md:p-6 border border-white/[0.06] h-full">
                   <div className="w-fit rounded-lg bg-electric-blue/10 p-3">
                     <card.icon className="w-5 h-5 text-electric-blue" />
                   </div>
@@ -286,17 +286,17 @@ export default function HomePage() {
       </section>
 
       {/* ===== SERVICES PREVIEW ===== */}
-      <section className="py-16 md:py-20 lg:py-24 bg-surface-secondary">
+      <section className="py-14 md:py-20 bg-surface-secondary">
         <div className="max-w-7xl mx-auto px-6">
           <SectionHeading
             title="What We Do"
             subtitle="End-to-end creative services"
           />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-8">
             {services.map((s, i) => (
               <AnimatedSection key={s.title} delay={i * 0.08}>
-                <div className="bg-surface-card rounded-xl p-6 border border-white/[0.06] hover:border-electric-blue/30 hover:shadow-[0_0_20px_rgba(37,99,235,0.1)] transition-all h-full">
+                <div className="bg-surface-card rounded-xl p-5 border border-white/[0.06] hover:border-electric-blue/30 hover:shadow-[0_0_20px_rgba(37,99,235,0.1)] transition-all h-full">
                   <h3 className="text-white font-medium text-base">{s.title}</h3>
                   <p className="text-matte-silver text-sm mt-2 leading-relaxed">
                     {s.description}
@@ -306,7 +306,7 @@ export default function HomePage() {
             ))}
           </div>
 
-          <AnimatedSection className="mt-8">
+          <AnimatedSection className="mt-6">
             <button
               onClick={() => navigate('services')}
               className="inline-flex items-center gap-2 text-electric-blue text-sm font-medium hover:gap-3 transition-all"
@@ -318,9 +318,9 @@ export default function HomePage() {
       </section>
 
       {/* ===== MEET SALOME ===== */}
-      <section className="py-16 md:py-20 lg:py-24 bg-obsidian">
+      <section className="py-14 md:py-20 bg-obsidian">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 items-center">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-14 items-center">
             {/* Photo - on top for mobile */}
             <AnimatedSection className="order-1 md:order-1">
               <div className="relative">
@@ -335,7 +335,7 @@ export default function HomePage() {
             </AnimatedSection>
 
             {/* Text */}
-            <div className="order-2 md:order-2 flex flex-col gap-6">
+            <div className="order-2 md:order-2 flex flex-col gap-4">
               <SectionHeading
                 title="Meet Salome"
                 subtitle="Founder & Creative Director"
@@ -374,15 +374,15 @@ export default function HomePage() {
       </section>
 
       {/* ===== TRUST & SOCIAL PROOF ===== */}
-      <section className="py-16 md:py-20 lg:py-24 bg-surface-secondary">
+      <section className="py-14 md:py-20 bg-surface-secondary">
         <div className="max-w-7xl mx-auto px-6">
           <SectionHeading title="Trusted by Innovative Brands" />
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 mt-10">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mt-8">
             {stats.map((stat, i) => (
               <AnimatedSection key={stat.label} delay={i * 0.1}>
                 <div className="text-center">
-                  <p className="text-3xl md:text-4xl font-bold text-electric-blue">
+                  <p className="text-2xl md:text-3xl font-bold text-electric-blue">
                     {stat.value}
                   </p>
                   <p className="text-matte-silver text-sm mt-2">{stat.label}</p>
@@ -394,11 +394,11 @@ export default function HomePage() {
       </section>
 
       {/* ===== FAQ ===== */}
-      <section className="py-16 md:py-20 lg:py-24 bg-obsidian">
+      <section className="py-14 md:py-20 bg-obsidian">
         <div className="max-w-3xl mx-auto px-6">
           <SectionHeading title="Frequently Asked Questions" />
 
-          <AnimatedSection className="mt-10" delay={0.15}>
+          <AnimatedSection className="mt-8" delay={0.15}>
             <Accordion type="single" collapsible className="w-full">
               {faqs.map((faq, i) => (
                 <AccordionItem
@@ -420,7 +420,7 @@ export default function HomePage() {
       </section>
 
       {/* ===== CTA ===== */}
-      <section className="py-16 md:py-20 lg:py-24 bg-surface-secondary relative">
+      <section className="py-14 md:py-20 bg-surface-secondary relative">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(37,99,235,0.05)_0%,transparent_70%)] pointer-events-none" />
 
         <div className="relative max-w-2xl mx-auto px-6 text-center">
@@ -438,7 +438,7 @@ export default function HomePage() {
           </AnimatedSection>
 
           <AnimatedSection delay={0.25}>
-            <div className="flex flex-wrap items-center justify-center gap-4 mt-8">
+            <div className="flex flex-wrap items-center justify-center gap-4 mt-6">
               <a
                 href={siteConfig.calendlyUrl}
                 target="_blank"

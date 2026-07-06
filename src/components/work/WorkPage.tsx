@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight, Sparkles } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { ArrowRight } from 'lucide-react'
 import {
   portfolio,
   portfolioCategories,
@@ -38,32 +38,114 @@ const creativeCollections = [
   },
 ]
 
-function MiniPortfolioCard({ project, onClick }: { project: PortfolioProject; onClick: () => void }) {
+/**
+ * Featured Lead Card — wider cinematic format for the hero project.
+ * Uses the same video-dominant design language as PortfolioCard
+ * but with a 21:9 ultra-wide aspect ratio.
+ */
+function FeaturedLeadCard({ project, onClick }: { project: PortfolioProject; onClick: () => void }) {
   const videoRef = useRef<HTMLVideoElement>(null)
+  const [isHovered, setIsHovered] = useState(false)
+  const [isLoaded, setIsLoaded] = useState(false)
+
   return (
     <div
-      className="relative aspect-video overflow-hidden rounded-lg cursor-pointer group"
-      onMouseEnter={() => { if (videoRef.current && window.matchMedia('(hover: hover)').matches) videoRef.current.play().catch(() => {}) }}
-      onMouseLeave={() => { if (videoRef.current) { videoRef.current.pause(); videoRef.current.currentTime = 0 } }}
+      className="relative overflow-hidden rounded-2xl cursor-pointer group"
+      style={{ aspectRatio: '21/9' }}
+      onMouseEnter={() => {
+        setIsHovered(true)
+        if (videoRef.current && window.matchMedia('(hover: hover)').matches) {
+          videoRef.current.play().catch(() => {})
+        }
+      }}
+      onMouseLeave={() => {
+        setIsHovered(false)
+        if (videoRef.current) {
+          videoRef.current.pause()
+          videoRef.current.currentTime = 0
+        }
+      }}
       onClick={onClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClick() }}
+      aria-label={`View ${project.title}`}
     >
-      <video ref={videoRef} src={project.video} muted loop playsInline preload="none" className="absolute inset-0 w-full h-full object-cover" />
-      <div className="absolute bottom-0 inset-x-0 h-1/2 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none" />
-      <div className="absolute bottom-0 left-0 p-3 md:p-4 pointer-events-none">
-        <h3 className="text-white font-medium text-xs md:text-sm">{project.title}</h3>
-        <p className="text-matte-silver text-[10px] md:text-xs mt-0.5">{project.category}</p>
+      {/* Thumbnail base */}
+      <img
+        src={project.thumbnail}
+        alt=""
+        className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700"
+        style={{ opacity: isHovered && isLoaded ? 0 : 1 }}
+      />
+      {/* Hover video */}
+      <video
+        ref={videoRef}
+        src={project.video}
+        muted
+        loop
+        playsInline
+        preload="none"
+        onCanPlay={() => setIsLoaded(true)}
+        className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700"
+        style={{ opacity: isHovered && isLoaded ? 1 : 0 }}
+      />
+      {/* Gradient */}
+      <div className="absolute bottom-0 inset-x-0 h-2/3 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none" />
+      {/* Electric blue glow */}
+      <div
+        className="absolute inset-0 rounded-2xl pointer-events-none transition-all duration-500"
+        style={{
+          boxShadow: isHovered
+            ? '0 0 0 1px rgba(37,99,235,0.25), 0 8px 50px rgba(37,99,235,0.12)'
+            : 'none',
+        }}
+      />
+      {/* Text — bottom-left */}
+      <div className="absolute bottom-0 left-0 p-5 md:p-8 pointer-events-none">
+        <span className="text-acid-lime text-[10px] font-medium uppercase tracking-wider">
+          Featured
+        </span>
+        <h3
+          className="text-white text-lg md:text-xl lg:text-2xl font-semibold mt-1.5 transition-all duration-500"
+          style={{ color: isHovered ? '#ffffff' : 'rgba(255,255,255,0.95)' }}
+        >
+          {project.title}
+        </h3>
+        <p
+          className="text-[11px] md:text-xs mt-1.5 transition-colors duration-500"
+          style={{
+            color: isHovered ? '#2563EB' : 'rgba(161,161,170,0.7)',
+          }}
+        >
+          {project.category} · {project.industry}
+        </p>
+      </div>
+      {/* View Project badge — top-right */}
+      <div
+        className="absolute top-4 right-4 transition-all duration-500"
+        style={{
+          opacity: isHovered ? 1 : 0,
+          transform: isHovered ? 'translateY(0)' : 'translateY(-4px)',
+        }}
+      >
+        <span className="text-electric-blue text-[10px] md:text-xs font-medium bg-black/50 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/[0.06]">
+          View Project
+        </span>
       </div>
     </div>
   )
 }
 
 export default function WorkPage() {
-  const { navigate, openProject } = useNavigation()
+  const { navigate, navigateToProject } = useNavigation()
   const [activeCategory, setActiveCategory] = useState<PortfolioCategory>('All')
   const filterRef = useRef<HTMLDivElement>(null)
 
   const workFeaturedLead = getProjectById('featured-new')
-  const featuredProjectsRest = getFeaturedProjects().slice(0, 2)
+  const featuredProjectsRest = getFeaturedProjects()
+    .filter((p) => p.id !== 'featured-new')
+    .slice(0, 2)
   const filteredProjects = getProjectsByCategory(activeCategory)
 
   const scrollToFilters = (cat: PortfolioCategory) => {
@@ -72,9 +154,9 @@ export default function WorkPage() {
   }
 
   return (
-    <div className="pt-16">
+    <div className="pt-[72px]">
       {/* ===== HERO ===== */}
-      <section className="py-20 md:py-28 bg-obsidian">
+      <section className="py-16 md:py-24 bg-obsidian">
         <div className="max-w-7xl mx-auto px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -93,61 +175,32 @@ export default function WorkPage() {
       </section>
 
       {/* ===== FEATURED STORIES ===== */}
-      <section className="py-16 md:py-20 bg-obsidian">
+      <section className="py-14 md:py-20 bg-obsidian">
         <div className="max-w-7xl mx-auto px-6">
           <SectionHeading
             title="Featured Stories"
             subtitle="Handpicked projects that showcase our creative range"
           />
 
-          {/* First project - full width */}
+          {/* Full-width cinematic lead */}
           {workFeaturedLead && (
-            <AnimatedSection className="mt-10">
-              <div
-                className="relative aspect-video md:aspect-[21/9] overflow-hidden rounded-xl cursor-pointer group"
-                onClick={() => openProject(workFeaturedLead.id)}
-              >
-                <video
-                  src={workFeaturedLead.video}
-                  muted loop playsInline preload="metadata"
-                  className="absolute inset-0 w-full h-full object-cover"
-                  onMouseEnter={(e) => (e.target as HTMLVideoElement).play().catch(() => {})}
-                  onMouseLeave={(e) => { const v = e.target as HTMLVideoElement; v.pause(); v.currentTime = 0 }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                <div className="absolute bottom-0 left-0 p-6 md:p-10 pointer-events-none">
-                  <span className="text-acid-lime text-xs font-medium uppercase tracking-wider">Featured</span>
-                  <h3 className="text-white text-xl md:text-2xl font-semibold mt-2">{workFeaturedLead.title}</h3>
-                  <p className="text-matte-silver text-sm mt-1">{workFeaturedLead.category} · {workFeaturedLead.industry}</p>
-                </div>
-                <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <span className="text-electric-blue text-xs font-medium bg-black/50 backdrop-blur-sm px-3 py-1.5 rounded-full">View Project</span>
-                </div>
-              </div>
+            <AnimatedSection className="mt-8">
+              <FeaturedLeadCard
+                project={workFeaturedLead}
+                onClick={() => navigateToProject(workFeaturedLead.slug)}
+              />
             </AnimatedSection>
           )}
 
-          {/* Next 2 - side by side */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-4 md:mt-6">
-            {featuredProjectsRest.map((p) => (
-              <AnimatedSection key={p.id}>
-                <div
-                  className="relative aspect-video overflow-hidden rounded-xl cursor-pointer group"
-                  onClick={() => openProject(p.id)}
-                >
-                  <video
-                    src={p.video}
-                    muted loop playsInline preload="metadata"
-                    className="absolute inset-0 w-full h-full object-cover"
-                    onMouseEnter={(e) => (e.target as HTMLVideoElement).play().catch(() => {})}
-                    onMouseLeave={(e) => { const v = e.target as HTMLVideoElement; v.pause(); v.currentTime = 0 }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                  <div className="absolute bottom-0 left-0 p-4 md:p-5 pointer-events-none">
-                    <h3 className="text-white text-sm md:text-base font-medium">{p.title}</h3>
-                    <p className="text-matte-silver text-[10px] md:text-xs mt-0.5">{p.category} · {p.industry}</p>
-                  </div>
-                </div>
+          {/* Next 2 — standard cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5 mt-4 md:mt-5">
+            {featuredProjectsRest.map((p, i) => (
+              <AnimatedSection key={p.id} delay={0.05 * (i + 1)}>
+                <PortfolioCard
+                  project={p}
+                  onClick={() => navigateToProject(p.slug)}
+                  index={i}
+                />
               </AnimatedSection>
             ))}
           </div>
@@ -155,7 +208,7 @@ export default function WorkPage() {
       </section>
 
       {/* ===== BROWSE BY SERVICE ===== */}
-      <section ref={filterRef} className="py-16 md:py-20 bg-surface-secondary">
+      <section ref={filterRef} className="py-14 md:py-20 bg-surface-secondary">
         <div className="max-w-7xl mx-auto px-6">
           <SectionHeading
             title="Browse by Service"
@@ -163,8 +216,8 @@ export default function WorkPage() {
           />
 
           {/* Filter Pills */}
-          <AnimatedSection className="mt-8" delay={0.1}>
-            <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-none">
+          <AnimatedSection className="mt-6" delay={0.1}>
+            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
               {portfolioCategories.map((cat) => (
                 <button
                   key={cat}
@@ -182,29 +235,20 @@ export default function WorkPage() {
           </AnimatedSection>
 
           {/* Project Count */}
-          <p className="text-matte-silver text-sm mt-6">
+          <p className="text-matte-silver text-sm mt-4">
             Showing <span className="text-white font-medium">{filteredProjects.length}</span> projects
           </p>
 
           {/* Project Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mt-6">
-            <AnimatePresence mode="popLayout">
-              {filteredProjects.map((p, i) => (
-                <motion.div
-                  key={p.id}
-                  layout
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.3, delay: i * 0.03 }}
-                >
-                  <PortfolioCard
-                    project={p}
-                    onClick={() => openProject(p.id)}
-                  />
-                </motion.div>
-              ))}
-            </AnimatePresence>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5 mt-4">
+            {filteredProjects.map((p, i) => (
+              <PortfolioCard
+                key={p.id}
+                project={p}
+                onClick={() => navigateToProject(p.slug)}
+                index={i}
+              />
+            ))}
           </div>
 
           {filteredProjects.length === 0 && (
@@ -216,14 +260,14 @@ export default function WorkPage() {
       </section>
 
       {/* ===== CREATIVE COLLECTIONS ===== */}
-      <section className="py-16 md:py-20 bg-obsidian">
+      <section className="py-14 md:py-20 bg-obsidian">
         <div className="max-w-7xl mx-auto px-6">
           <SectionHeading
             title="Creative Collections"
             subtitle="Curated groups of our best work by theme"
           />
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mt-10">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5 mt-8">
             {creativeCollections.map((collection, i) => {
               const projects = getProjectsByCategory(collection.category).slice(0, 3)
               return (
@@ -265,7 +309,7 @@ export default function WorkPage() {
       </section>
 
       {/* ===== FINAL CTA ===== */}
-      <section className="py-16 md:py-20 bg-surface-secondary relative">
+      <section className="py-14 md:py-20 bg-surface-secondary relative">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(37,99,235,0.05)_0%,transparent_70%)] pointer-events-none" />
         <div className="relative max-w-2xl mx-auto px-6 text-center">
           <AnimatedSection>
@@ -275,7 +319,7 @@ export default function WorkPage() {
             <p className="text-matte-silver mt-4 text-sm md:text-base leading-relaxed">
               Let&apos;s bring your vision to life with cinematic quality and creative precision. Every project starts with a conversation.
             </p>
-            <div className="flex flex-wrap items-center justify-center gap-4 mt-8">
+            <div className="flex flex-wrap items-center justify-center gap-4 mt-6">
               <button
                 onClick={() => navigate('contact')}
                 className="bg-electric-blue text-white px-8 py-3 rounded-full font-medium text-sm hover:bg-electric-blue/90 transition-colors inline-flex items-center gap-2"

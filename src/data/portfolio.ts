@@ -17,6 +17,7 @@ export interface PortfolioProject {
   tags: string[];
   relatedProjectIds: string[];
   client?: string;
+  additionalImages?: string[];
 }
 
 export const portfolioCategories = [

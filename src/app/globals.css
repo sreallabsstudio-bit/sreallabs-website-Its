@@ -145,3 +145,24 @@ a, button {
 .glow-blue-strong {
   box-shadow: 0 0 30px rgba(37, 99, 235, 0.3), 0 0 60px rgba(37, 99, 235, 0.1);
 }
+
+/* Scrollbar hide utility for filmstrip */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Portfolio viewer smooth scroll container */
+.portfolio-viewer-scroll {
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Video poster-to-video crossfade smoothness */
+video {
+  outline: none;
+  will-change: opacity;
+}
