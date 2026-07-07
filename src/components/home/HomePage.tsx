@@ -1,20 +1,14 @@
 'use client'
 
-import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Film, Sparkles, Target, ArrowRight } from 'lucide-react'
 import { siteConfig } from '@/data/siteConfig'
-import {
-  portfolio,
-  portfolioCategories,
-  getFeaturedProjects,
-  getProjectsByCategory,
-  type PortfolioCategory,
-} from '@/data/portfolio'
+import { getFeaturedProjects } from '@/data/portfolio'
 import { useNavigation } from '@/store/navigation'
 import AnimatedSection from '@/components/shared/AnimatedSection'
 import SectionHeading from '@/components/shared/SectionHeading'
 import PortfolioCard from '@/components/shared/PortfolioCard'
+import TestimonialsSection from '@/components/home/TestimonialsSection'
 import {
   Accordion,
   AccordionItem,
@@ -111,10 +105,8 @@ const stagger = {
 
 export default function HomePage() {
   const { navigate, navigateToProject } = useNavigation()
-  const [activeCategory, setActiveCategory] = useState<PortfolioCategory>('All')
 
   const featuredProjects = getFeaturedProjects().slice(0, 4)
-  const filteredProjects = getProjectsByCategory(activeCategory).slice(0, 6)
 
   return (
     <div>
@@ -193,8 +185,8 @@ export default function HomePage() {
       <section className="py-14 md:py-20 bg-obsidian">
         <div className="max-w-7xl mx-auto px-6">
           <SectionHeading
-            title="Featured Work"
-            subtitle="Selected projects that define our craft"
+            title="Selected Work"
+            subtitle="A curated selection of cinematic 3D product animations and AI-powered visual stories created for ambitious brands, startups and technology companies."
           />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-8">
@@ -219,46 +211,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ===== BROWSE BY CATEGORY ===== */}
-      <section className="py-14 md:py-20 bg-surface-secondary">
-        <div className="max-w-7xl mx-auto px-6">
-          <SectionHeading
-            title="Browse by Category"
-            subtitle="Explore our work across industries"
-          />
-
-          {/* Category Pills */}
-          <AnimatedSection className="mt-8">
-            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
-              {portfolioCategories.map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setActiveCategory(cat)}
-                  className={`flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-medium transition-all ${
-                    activeCategory === cat
-                      ? 'bg-electric-blue text-white'
-                      : 'bg-white/5 text-matte-silver hover:bg-white/10 hover:text-white'
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-          </AnimatedSection>
-
-          {/* Project Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mt-8">
-            {filteredProjects.map((p, i) => (
-              <PortfolioCard
-                key={p.id}
-                project={p}
-                onClick={() => navigateToProject(p.slug)}
-                index={i}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* ===== CLIENT TESTIMONIALS ===== */}
+      <TestimonialsSection />
 
       {/* ===== WHY SREALLABS ===== */}
       <section className="py-14 md:py-20 bg-obsidian">
