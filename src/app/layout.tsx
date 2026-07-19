@@ -118,7 +118,13 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://calendly.com" />
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
 
-        {/* Organizational meta for search engines */}
+        {/* Stale chunk recovery — reloads page once when a chunk fails to load
+            (happens after deployments when the browser caches old chunk hashes) */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.addEventListener('error',function(e){if(e.target&&e.target.tagName==='SCRIPT'&&e.target.src&&e.target.src.includes('/_next/')){e.preventDefault();sessionStorage.setItem('sreallabs_chunk_reload','1');window.location.reload()}},true);if(sessionStorage.getItem('sreallabs_chunk_reload')==='1'){sessionStorage.removeItem('sreallabs_chunk_reload');window.location.reload()}`,
+          }}
+        />
         <meta name="author" content="Salome" />
         <meta name="publisher" content="SREALLABS" />
         <meta name="theme-color" content="#0A0A0A" />

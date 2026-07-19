@@ -57,36 +57,36 @@ export interface PageSeo {
 
 export const pageSeoMap: Record<string, PageSeo> = {
   home: {
-    title: 'SREALLABS | Cinematic 3D Product Animation & AI Commercial Studio',
+    title: 'SREALLABS | Premium Product Visualization & Cinematic 3D Animation Studio',
     description:
-      'SREALLABS creates cinematic 3D product animation, AI commercials, AI UGC videos and SaaS product films that help ambitious brands launch, grow and convert.',
+      'SREALLABS creates cinematic product films, 3D animation and AI-powered visual storytelling that help ambitious brands increase perceived value, capture attention and drive results.',
     path: '/',
-    ogTitle: 'SREALLABS | Reality, Rendered.',
+    ogTitle: 'SREALLABS | We Make Products Feel Premium.',
     ogDescription:
-      'Premium cinematic 3D product animation, AI commercials and visual storytelling for brands that want to stand out.',
+      'Premium cinematic product visualization, 3D animation and visual storytelling for brands that want to increase perceived product value.',
   },
   work: {
-    title: 'Our Work | SREALLABS',
+    title: 'Selected Work | SREALLABS — Premium Product Films & Visual Storytelling',
     description:
-      'Explore cinematic 3D product animation, AI commercials, AI UGC campaigns and SaaS videos created by SREALLABS.',
+      'Explore premium product films, cinematic 3D animations, and visual storytelling created by SREALLABS for brands across consumer electronics, luxury, automotive, SaaS and more.',
     path: '/work',
   },
   services: {
-    title: 'Services | SREALLABS',
+    title: 'Services | SREALLABS — Premium Creative Services for Product Brands',
     description:
-      'Discover premium 3D product animation, AI video production, SaaS storytelling and creative technology services by SREALLABS.',
+      'Discover premium 3D product animation, cinematic product films, AI commercials, AI UGC and visual storytelling services by SREALLABS.',
     path: '/services',
   },
   about: {
-    title: 'About Salome | SREALLABS',
+    title: 'About | SREALLABS — Premium Creative Studio',
     description:
-      'Meet Salome, founder of SREALLABS, and discover the story behind Reality, Rendered.',
+      'Meet Salome, founder of SREALLABS. Discover how our philosophy of craft, technology and results drives premium visual storytelling for ambitious brands.',
     path: '/about',
   },
   contact: {
-    title: 'Contact | SREALLABS',
+    title: 'Contact | SREALLABS — Start Your Premium Visual Project',
     description:
-      'Start your next project with SREALLABS. Book a discovery call or contact us today.',
+      'Start your next premium visual project with SREALLABS. Book a discovery call or contact us today.',
     path: '/contact',
   },
 }
@@ -122,7 +122,7 @@ export function buildOrganizationSchema() {
     logo: logoUrl,
     image: ogImage,
     description:
-      'Premium Creative Technology Studio specializing in cinematic 3D product animation, AI commercials, AI UGC, and SaaS product videos.',
+      'Premium Creative Studio specializing in cinematic product visualization, 3D animation, AI-powered commercials, and visual storytelling that helps brands increase perceived product value.',
     email: 'sreallabs.studio@gmail.com',
     founder: {
       '@type': 'Person',
@@ -147,7 +147,7 @@ export function buildWebsiteSchema() {
     name: 'SREALLABS',
     url: siteUrl,
     description:
-      'Cinematic 3D product animation, AI commercials and creative storytelling studio.',
+      'Premium product visualization, cinematic 3D animation and AI-powered visual storytelling studio.',
     publisher: {
       '@type': 'Organization',
       name: 'SREALLABS',

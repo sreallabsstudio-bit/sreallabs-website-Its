@@ -1,0 +1,705 @@
+     1→'use client'
+     2→
+     3→import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
+     4→import { motion, useInView } from 'framer-motion'
+     5→import {
+     6→  ArrowLeft,
+     7→  ArrowRight,
+     8→  ArrowUpRight,
+     9→  Volume2,
+    10→  VolumeX,
+    11→  Image as ImageIcon,
+    12→  ChevronLeft,
+    13→  ChevronRight,
+    14→} from 'lucide-react'
+    15→import { useNavigation } from '@/store/navigation'
+    16→import {
+    17→  portfolio,
+    18→  getProjectBySlug,
+    19→  getProjectsByCategory,
+    20→  type PortfolioProject,
+    21→  type PortfolioCategory,
+    22→} from '@/data/portfolio'
+    23→import AnimatedSection from '@/components/shared/AnimatedSection'
+    24→import PortfolioCard from '@/components/shared/PortfolioCard'
+    25→
+    26→/* ═══════════════════════════════════════════════════════════════
+    27→   PREMIUM EASING
+    28→   ═══════════════════════════════════════════════════════════════ */
+    29→
+    30→const ease = [0.22, 1, 0.36, 1] as const
+    31→
+    32→const fadeUp = {
+    33→  hidden: { opacity: 0, y: 28 },
+    34→  visible: (i: number) => ({
+    35→    opacity: 1,
+    36→    y: 0,
+    37→    transition: { delay: i * 0.1, duration: 0.7, ease },
+    38→  }),
+    39→}
+    40→
+    41→const fadeIn = {
+    42→  hidden: { opacity: 0 },
+    43→  visible: { opacity: 1, transition: { duration: 0.5, ease } },
+    44→}
+    45→
+    46→/* ═══════════════════════════════════════════════════════════════
+    47→   SECTION LABEL
+    48→   ═══════════════════════════════════════════════════════════════ */
+    49→
+    50→function SectionLabel({ children }: { children: React.ReactNode }) {
+    51→  return (
+    52→    <p className="text-[10px] uppercase tracking-[0.25em] text-electric-blue font-semibold mb-5 flex items-center gap-2.5">
+    53→      <span className="w-4 h-px bg-electric-blue/60" />
+    54→      {children}
+    55→    </p>
+    56→  )
+    57→}
+    58→
+    59→/* ═══════════════════════════════════════════════════════════════
+    60→   INFO CHIP
+    61→   ═══════════════════════════════════════════════════════════════ */
+    62→
+    63→function InfoChip({ label, value }: { label: string; value: string }) {
+    64→  return (
+    65→    <div className="flex items-baseline gap-2">
+    66→      <span className="text-[10px] uppercase tracking-[0.12em] text-white/20 font-medium">
+    67→        {label}
+    68→      </span>
+    69→      <span className="text-sm text-white/70 font-light">{value}</span>
+    70→    </div>
+    71→  )
+    72→}
+    73→
+    74→/* ═══════════════════════════════════════════════════════════════
+    75→   DIVIDER
+    76→   ═══════════════════════════════════════════════════════════════ */
+    77→
+    78→function Divider() {
+    79→  return <div className="w-full h-px bg-white/[0.06]" />
+    80→}
+    81→
+    82→/* ═══════════════════════════════════════════════════════════════
+    83→   GALLERY LIGHTBOX
+    84→   ═══════════════════════════════════════════════════════════════ */
+    85→
+    86→function GalleryLightbox({
+    87→  images,
+    88→  initialIndex,
+    89→  onClose,
+    90→}: {
+    91→  images: string[]
+    92→  initialIndex: number
+    93→  onClose: () => void
+    94→}) {
+    95→  const [activeIdx, setActiveIdx] = useState(initialIndex)
+    96→  const [loaded, setLoaded] = useState(false)
+    97→
+    98→  const goPrev = useCallback(
+    99→    () => setActiveIdx((i) => (i > 0 ? i - 1 : images.length - 1)),
+   100→    [images.length],
+   101→  )
+   102→  const goNext = useCallback(
+   103→    () => setActiveIdx((i) => (i < images.length - 1 ? i + 1 : 0)),
+   104→    [images.length],
+   105→  )
+   106→
+   107→  useEffect(() => {
+   108→    setLoaded(false)
+   109→  }, [activeIdx])
+   110→
+   111→  useEffect(() => {
+   112→    const handleKey = (e: KeyboardEvent) => {
+   113→      if (e.key === 'Escape') onClose()
+   114→      if (e.key === 'ArrowLeft') goPrev()
+   115→      if (e.key === 'ArrowRight') goNext()
+   116→    }
+   117→    window.addEventListener('keydown', handleKey)
+   118→    document.body.style.overflow = 'hidden'
+   119→    return () => {
+   120→      window.removeEventListener('keydown', handleKey)
+   121→      document.body.style.overflow = ''
+   122→    }
+   123→  }, [onClose, goPrev, goNext])
+   124→
+   125→  return (
+   126→    <motion.div
+   127→      initial={{ opacity: 0 }}
+   128→      animate={{ opacity: 1 }}
+   129→      exit={{ opacity: 0 }}
+   130→      transition={{ duration: 0.3, ease }}
+   131→      className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex items-center justify-center"
+   132→      onClick={onClose}
+   133→    >
+   134→      {/* Close button */}
+   135→      <button
+   136→        onClick={onClose}
+   137→        className="absolute top-5 right-5 w-10 h-10 flex items-center justify-center rounded-full bg-white/5 text-white/50 hover:text-white hover:bg-white/10 transition-all duration-300 z-10"
+   138→        aria-label="Close gallery"
+   139→      >
+   140→        <ArrowUpRight className="w-4 h-4 rotate-45" />
+   141→      </button>
+   142→
+   143→      {/* Counter */}
+   144→      <div className="absolute top-6 left-6 text-[11px] text-white/30 font-medium tracking-wider">
+   145→        {activeIdx + 1} / {images.length}
+   146→      </div>
+   147→
+   148→      {/* Navigation arrows */}
+   149→      {images.length > 1 && (
+   150→        <>
+   151→          <button
+   152→            onClick={(e) => { e.stopPropagation(); goPrev() }}
+   153→            className="absolute left-4 md:left-6 w-10 h-10 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 text-white/40 hover:text-white/80 transition-all duration-300 z-10"
+   154→            aria-label="Previous image"
+   155→          >
+   156→            <ChevronLeft className="w-5 h-5" />
+   157→          </button>
+   158→          <button
+   159→            onClick={(e) => { e.stopPropagation(); goNext() }}
+   160→            className="absolute right-4 md:right-6 w-10 h-10 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 text-white/40 hover:text-white/80 transition-all duration-300 z-10"
+   161→            aria-label="Next image"
+   162→          >
+   163→            <ChevronRight className="w-5 h-5" />
+   164→          </button>
+   165→        </>
+   166→      )}
+   167→
+   168→      {/* Image */}
+   169→      <motion.div
+   170→        key={activeIdx}
+   171→        initial={{ opacity: 0, scale: 0.97 }}
+   172→        animate={{ opacity: 1, scale: 1 }}
+   173→        exit={{ opacity: 0, scale: 0.97 }}
+   174→        transition={{ duration: 0.35, ease }}
+   175→        className="max-w-[90vw] max-h-[85vh] relative"
+   176→        onClick={(e) => e.stopPropagation()}
+   177→      >
+   178→        <img
+   179→          src={images[activeIdx]}
+   180→          alt=""
+   181→          onLoad={() => setLoaded(true)}
+   182→          className="max-w-full max-h-[85vh] object-contain rounded-lg transition-opacity duration-500"
+   183→          style={{ opacity: loaded ? 1 : 0 }}
+   184→        />
+   185→      </motion.div>
+   186→
+   187→      {/* Thumbnail strip */}
+   188→      {images.length > 1 && (
+   189→        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
+   190→          {images.map((img, i) => (
+   191→            <button
+   192→              key={i}
+   193→              onClick={(e) => { e.stopPropagation(); setActiveIdx(i) }}
+   194→              className={`w-12 h-8 rounded overflow-hidden transition-all duration-300 ${
+   195→                i === activeIdx
+   196→                  ? 'ring-1 ring-electric-blue/60 opacity-100'
+   197→                  : 'opacity-40 hover:opacity-70'
+   198→              }`}
+   199→            >
+   200→              <img src={img} alt="" className="w-full h-full object-cover" />
+   201→            </button>
+   202→          ))}
+   203→        </div>
+   204→      )}
+   205→    </motion.div>
+   206→  )
+   207→}
+   208→
+   209→/* ═══════════════════════════════════════════════════════════════
+   210→   PROJECT PAGE
+   211→   ═══════════════════════════════════════════════════════════════ */
+   212→
+   213→export default function ProjectPage() {
+   214→  const { currentProjectSlug, navigate, navigateToProject } = useNavigation()
+   215→  const project = currentProjectSlug ? getProjectBySlug(currentProjectSlug) : undefined
+   216→
+   217→  // ─── Prev / Next in the full portfolio array ───
+   218→  const projectIndex = project
+   219→    ? portfolio.findIndex((p) => p.id === project.id)
+   220→    : -1
+   221→
+   222→  const prevProject = projectIndex > 0 ? portfolio[projectIndex - 1] : null
+   223→  const nextProject =
+   224→    projectIndex >= 0 && projectIndex < portfolio.length - 1
+   225→      ? portfolio[projectIndex + 1]
+   226→      : null
+   227→
+   228→  // ─── Related projects (same category, exclude current) ───
+   229→  const relatedProjects = useMemo(() => {
+   230→    if (!project) return []
+   231→    const cat = project.buyerCategory as PortfolioCategory
+   232→    const same = getProjectsByCategory(cat).filter(
+   233→      (p) => p.id !== project.id,
+   234→    )
+   235→    const manual = project.relatedProjectIds
+   236→      .map((id) => portfolio.find((p) => p.id === id))
+   237→      .filter((p): p is PortfolioProject => !!p && p.id !== project.id)
+   238→    const combined = [
+   239→      ...new Map([...manual, ...same].map((p) => [p.id, p])).values(),
+   240→    ]
+   241→    return combined.slice(0, 8)
+   242→  }, [project])
+   243→
+   244→  // ─── Sound toggle ───
+   245→  const [isMuted, setIsMuted] = useState(true)
+   246→  const heroVideoRef = useRef<HTMLVideoElement>(null)
+   247→
+   248→  // ─── Gallery lightbox state ───
+   249→  const [lightboxOpen, setLightboxOpen] = useState(false)
+   250→  const [lightboxIndex, setLightboxIndex] = useState(0)
+   251→
+   252→  // ─── Preload next project video ───
+   253→  useEffect(() => {
+   254→    if (!nextProject) return
+   255→    const link = document.createElement('link')
+   256→    link.rel = 'prefetch'
+   257→    link.as = 'video'
+   258→    link.href = nextProject.video
+   259→    document.head.appendChild(link)
+   260→    return () => {
+   261→      try { document.head.removeChild(link) } catch {}
+   262→    }
+   263→  }, [nextProject])
+   264→
+   265→  // ─── Keyboard navigation ───
+   266→  useEffect(() => {
+   267→    if (lightboxOpen) return
+   268→    const handleKey = (e: KeyboardEvent) => {
+   269→      if (e.key === 'ArrowLeft' && prevProject) navigateToProject(prevProject.slug)
+   270→      if (e.key === 'ArrowRight' && nextProject) navigateToProject(nextProject.slug)
+   271→    }
+   272→    window.addEventListener('keydown', handleKey)
+   273→    return () => window.removeEventListener('keydown', handleKey)
+   274→  }, [prevProject, nextProject, navigateToProject, lightboxOpen])
+   275→
+   276→  // ─── 404 guard ───
+   277→  if (!project) {
+   278→    return (
+   279→      <div className="pt-[72px] min-h-screen flex items-center justify-center bg-obsidian">
+   280→        <div className="text-center">
+   281→          <p className="text-electric-blue text-sm font-medium">Project not found</p>
+   282→          <button
+   283→            onClick={() => navigate('work')}
+   284→            className="mt-4 text-matte-silver text-sm hover:text-white transition-colors"
+   285→          >
+   286→            &larr; Back to Work
+   287→          </button>
+   288→        </div>
+   289→      </div>
+   290→    )
+   291→  }
+   292→
+   293→  const goPrev = () => prevProject && navigateToProject(prevProject.slug)
+   294→  const goNext = () => nextProject && navigateToProject(nextProject.slug)
+   295→
+   296→  const hasGallery = project.additionalImages && project.additionalImages.length > 0
+   297→
+   298→  return (
+   299→    <div className="bg-obsidian">
+   300→      {/* ═══════════════════════════════════════════════════════
+   301→          HERO — CINEMATIC VIDEO (full-viewport dominant)
+   302→          ═══════════════════════════════════════════════════════ */}
+   303→      <section className="relative">
+   304→        <div className="relative w-full bg-black" style={{ aspectRatio: '21/9' }}>
+   305→          <video
+   306→            ref={heroVideoRef}
+   307→            src={project.video}
+   308→            autoPlay
+   309→            muted={isMuted}
+   310→            loop
+   311→            playsInline
+   312→            className="w-full h-full object-cover"
+   313→          />
+   314→
+   315→          {/* Top fade to navbar */}
+   316→          <div className="absolute top-0 inset-x-0 h-24 bg-gradient-to-b from-obsidian/60 to-transparent pointer-events-none" />
+   317→
+   318→          {/* Bottom fade to content */}
+   319→          <div className="absolute bottom-0 inset-x-0 h-2/5 bg-gradient-to-t from-obsidian via-obsidian/70 to-transparent pointer-events-none" />
+   320→
+   321→          {/* Sound toggle */}
+   322→          <motion.button
+   323→            initial={{ opacity: 0 }}
+   324→            animate={{ opacity: 1 }}
+   325→            transition={{ delay: 1, duration: 0.5, ease }}
+   326→            onClick={() => setIsMuted(!isMuted)}
+   327→            className="absolute bottom-6 right-6 w-10 h-10 flex items-center justify-center rounded-full bg-black/40 backdrop-blur-md text-white/40 hover:text-white/90 hover:bg-black/60 transition-all duration-300"
+   328→            aria-label={isMuted ? 'Unmute' : 'Mute'}
+   329→          >
+   330→            {isMuted ? (
+   331→              <VolumeX className="w-4 h-4" />
+   332→            ) : (
+   333→              <Volume2 className="w-4 h-4" />
+   334→            )}
+   335→          </motion.button>
+   336→        </div>
+   337→
+   338→        {/* Title + Breadcrumb overlay at bottom of hero */}
+   339→        <motion.div
+   340→          initial={{ opacity: 0, y: 20 }}
+   341→          animate={{ opacity: 1, y: 0 }}
+   342→          transition={{ delay: 0.2, duration: 0.7, ease }}
+   343→          className="absolute bottom-0 left-0 right-0 px-6 md:px-[max(1.5rem,calc((100vw-80rem)/2+1.5rem))] pb-7 md:pb-10 pointer-events-none"
+   344→        >
+   345→          {/* Breadcrumb */}
+   346→          <div className="flex items-center gap-2 mb-3">
+   347→            <button
+   348→              onClick={() => navigate('work')}
+   349→              className="text-white/25 text-[11px] hover:text-white/50 transition-colors pointer-events-auto font-light tracking-wide"
+   350→            >
+   351→              Work
+   352→            </button>
+   353→            <span className="text-white/10 text-[10px]">/</span>
+   354→            <span className="text-electric-blue/70 text-[11px] font-light tracking-wide">
+   355→              {project.category}
+   356→            </span>
+   357→          </div>
+   358→
+   359→          <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white tracking-tight leading-[1.1] max-w-4xl">
+   360→            {project.title}
+   361→          </h1>
+   362→        </motion.div>
+   363→      </section>
+   364→
+   365→      {/* ═══════════════════════════════════════════════════════
+   366→          PROJECT INFORMATION BAR
+   367→          ═══════════════════════════════════════════════════════ */}
+   368→      <AnimatedSection className="py-7 md:py-9 border-b border-white/[0.06]">
+   369→        <div className="max-w-5xl mx-auto px-6 md:px-8">
+   370→          <div className="flex flex-wrap items-center gap-x-7 gap-y-2.5">
+   371→            {project.client && <InfoChip label="Client" value={project.client} />}
+   372→            <InfoChip label="Industry" value={project.industry} />
+   373→            <InfoChip label="Service" value={project.service} />
+   374→            <InfoChip label="Category" value={project.category} />
+   375→            {project.year && <InfoChip label="Year" value={project.year} />}
+   376→          </div>
+   377→        </div>
+   378→      </AnimatedSection>
+   379→
+   380→      {/* ═══════════════════════════════════════════════════════
+   381→          PROJECT OVERVIEW
+   382→          ═══════════════════════════════════════════════════════ */}
+   383→      <section className="py-16 md:py-24">
+   384→        <div className="max-w-3xl mx-auto px-6 md:px-8">
+   385→          <AnimatedSection>
+   386→            <SectionLabel>Overview</SectionLabel>
+   387→            <p className="text-matte-silver/90 text-sm md:text-[15px] leading-[1.85] font-light">
+   388→              {project.fullDescription || project.description}
+   389→            </p>
+   390→          </AnimatedSection>
+   391→        </div>
+   392→      </section>
+   393→
+   394→      <Divider />
+   395→
+   396→      {/* ═══════════════════════════════════════════════════════
+   397→          CREATIVE CHALLENGE
+   398→          ═══════════════════════════════════════════════════════ */}
+   399→      <section className="py-16 md:py-24">
+   400→        <div className="max-w-3xl mx-auto px-6 md:px-8">
+   401→          <AnimatedSection>
+   402→            <SectionLabel>Creative Challenge</SectionLabel>
+   403→            <p className="text-matte-silver/90 text-sm md:text-[15px] leading-[1.85] font-light">
+   404→              {project.challenge}
+   405→            </p>
+   406→          </AnimatedSection>
+   407→        </div>
+   408→      </section>
+   409→
+   410→      <Divider />
+   411→
+   412→      {/* ═══════════════════════════════════════════════════════
+   413→          CREATIVE SOLUTION
+   414→          ═══════════════════════════════════════════════════════ */}
+   415→      <section className="py-16 md:py-24">
+   416→        <div className="max-w-3xl mx-auto px-6 md:px-8">
+   417→          <AnimatedSection>
+   418→            <SectionLabel>Creative Solution</SectionLabel>
+   419→            <p className="text-matte-silver/90 text-sm md:text-[15px] leading-[1.85] font-light">
+   420→              {project.solution}
+   421→            </p>
+   422→          </AnimatedSection>
+   423→        </div>
+   424→      </section>
+   425→
+   426→      <Divider />
+   427→
+   428→      {/* ═══════════════════════════════════════════════════════
+   429→          FINAL RESULT
+   430→          ═══════════════════════════════════════════════════════ */}
+   431→      <section className="py-16 md:py-24">
+   432→        <div className="max-w-3xl mx-auto px-6 md:px-8">
+   433→          <AnimatedSection>
+   434→            <SectionLabel>Final Result</SectionLabel>
+   435→            <p className="text-matte-silver/90 text-sm md:text-[15px] leading-[1.85] font-light">
+   436→              {project.result}
+   437→            </p>
+   438→          </AnimatedSection>
+   439→        </div>
+   440→      </section>
+   441→
+   442→      {/* ═══════════════════════════════════════════════════════
+   443→          GALLERY (optional — only if additionalImages exist)
+   444→          ═══════════════════════════════════════════════════════ */}
+   445→      {hasGallery && (
+   446→        <>
+   447→          <Divider />
+   448→          <section className="py-16 md:py-24">
+   449→            <div className="max-w-6xl mx-auto px-6 md:px-8">
+   450→              <AnimatedSection>
+   451→                <div className="flex items-center justify-between mb-8">
+   452→                  <div>
+   453→                    <SectionLabel>Gallery</SectionLabel>
+   454→                    <p className="text-white/30 text-xs font-light -mt-3 ml-[26px]">
+   455→                      Additional renders &amp; details
+   456→                    </p>
+   457→                  </div>
+   458→                  <span className="text-white/15 text-[11px] tracking-wider font-light">
+   459→                    {project.additionalImages!.length} images
+   460→                  </span>
+   461→                </div>
+   462→              </AnimatedSection>
+   463→
+   464→              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+   465→                {project.additionalImages!.map((img, i) => (
+   466→                  <AnimatedSection key={i} delay={i * 0.05}>
+   467→                    <button
+   468→                      onClick={() => {
+   469→                        setLightboxIndex(i)
+   470→                        setLightboxOpen(true)
+   471→                      }}
+   472→                      className="relative group overflow-hidden rounded-xl aspect-[4/3] w-full"
+   473→                    >
+   474→                      <img
+   475→                        src={img}
+   476→                        alt=""
+   477→                        loading="lazy"
+   478→                        className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+   479→                      />
+   480→                      {/* Hover overlay */}
+   481→                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300 flex items-center justify-center">
+   482→                        <div className="opacity-0 group-hover:opacity-100 transition-all duration-300 scale-90 group-hover:scale-100">
+   483→                          <ImageIcon className="w-5 h-5 text-white/80" />
+   484→                        </div>
+   485→                      </div>
+   486→                      {/* Electric blue border glow on hover */}
+   487→                      <div
+   488→                        className="absolute inset-0 rounded-xl pointer-events-none transition-all duration-500"
+   489→                        style={{
+   490→                          boxShadow: 'none',
+   491→                        }}
+   492→                        onMouseEnter={(e) => {
+   493→                          ;(e.currentTarget as HTMLElement).style.boxShadow =
+   494→                            'inset 0 0 0 1px rgba(37,99,235,0.3), 0 4px 20px rgba(37,99,235,0.1)'
+   495→                        }}
+   496→                        onMouseLeave={(e) => {
+   497→                          ;(e.currentTarget as HTMLElement).style.boxShadow = 'none'
+   498→                        }}
+   499→                      />
+   500→                    </button>
+   501→                  </AnimatedSection>
+   502→                ))}
+   503→              </div>
+   504→            </div>
+   505→          </section>
+   506→        </>
+   507→      )}
+   508→
+   509→      {/* ═══════════════════════════════════════════════════════
+   510→          TAGS
+   511→          ═══════════════════════════════════════════════════════ */}
+   512→      {project.tags && project.tags.length > 0 && (
+   513→        <>
+   514→          <Divider />
+   515→          <section className="py-10">
+   516→            <div className="max-w-5xl mx-auto px-6 md:px-8">
+   517→              <div className="flex flex-wrap gap-2">
+   518→                {project.tags.map((tag) => (
+   519→                  <span
+   520→                    key={tag}
+   521→                    className="text-[9px] uppercase tracking-[0.1em] text-white/20 border border-white/[0.06] rounded-full px-3.5 py-1.5 hover:border-electric-blue/20 hover:text-white/30 transition-colors duration-300"
+   522→                  >
+   523→                    {tag}
+   524→                  </span>
+   525→                ))}
+   526→              </div>
+   527→            </div>
+   528→          </section>
+   529→        </>
+   530→      )}
+   531→
+   532→      {/* ═══════════════════════════════════════════════════════
+   533→          RELATED PROJECTS (same category only)
+   534→          ═══════════════════════════════════════════════════════ */}
+   535→      {relatedProjects.length > 0 && (
+   536→        <section className="py-16 md:py-24 bg-surface-secondary">
+   537→          <div className="max-w-7xl mx-auto px-6 md:px-8">
+   538→            <AnimatedSection>
+   539→              <div className="flex items-end justify-between mb-10">
+   540→                <div>
+   541→                  <p className="text-[10px] uppercase tracking-[0.25em] text-white/15 font-medium mb-2">
+   542→                    More in {project.category}
+   543→                  </p>
+   544→                  <h2 className="text-2xl md:text-3xl font-semibold text-white tracking-tight">
+   545→                    Related Projects
+   546→                  </h2>
+   547→                </div>
+   548→                <button
+   549→                  onClick={() => navigate('work')}
+   550→                  className="hidden md:inline-flex items-center gap-1.5 text-electric-blue/60 text-xs font-medium hover:text-electric-blue transition-colors duration-300"
+   551→                >
+   552→                  View All
+   553→                  <ArrowRight className="w-3 h-3" />
+   554→                </button>
+   555→              </div>
+   556→            </AnimatedSection>
+   557→
+   558→            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+   559→              {relatedProjects.map((rp, i) => (
+   560→                <AnimatedSection key={rp.id} delay={i * 0.05}>
+   561→                  <PortfolioCard
+   562→                    project={rp}
+   563→                    onClick={() => navigateToProject(rp.slug)}
+   564→                    index={i}
+   565→                  />
+   566→                </AnimatedSection>
+   567→              ))}
+   568→            </div>
+   569→
+   570→            <AnimatedSection className="mt-8 md:hidden" delay={0.2}>
+   571→              <button
+   572→                onClick={() => navigate('work')}
+   573→                className="inline-flex items-center gap-1.5 text-electric-blue/60 text-xs font-medium hover:text-electric-blue transition-colors"
+   574→              >
+   575→                View All Projects
+   576→                <ArrowRight className="w-3 h-3" />
+   577→              </button>
+   578→            </AnimatedSection>
+   579→          </div>
+   580→        </section>
+   581→      )}
+   582→
+   583→      {/* ═══════════════════════════════════════════════════════
+   584→          PREV / NEXT PROJECT NAVIGATION
+   585→          ═══════════════════════════════════════════════════════ */}
+   586→      <section className="py-16 md:py-24">
+   587→        <div className="max-w-5xl mx-auto px-6 md:px-8">
+   588→          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+   589→            {prevProject ? (
+   590→              <AnimatedSection>
+   591→                <button
+   592→                  onClick={goPrev}
+   593→                  className="group flex items-center gap-4 text-left w-full p-6 rounded-xl border border-white/[0.06] hover:border-electric-blue/20 hover:bg-white/[0.015] transition-all duration-400"
+   594→                >
+   595→                  <div className="w-8 h-8 flex items-center justify-center rounded-full border border-white/[0.08] group-hover:border-electric-blue/30 transition-colors duration-300 flex-shrink-0">
+   596→                    <ArrowLeft className="w-3.5 h-3.5 text-matte-silver/30 group-hover:text-electric-blue transition-colors duration-300" />
+   597→                  </div>
+   598→                  <div className="min-w-0">
+   599→                    <p className="text-[10px] uppercase tracking-[0.15em] text-white/15 mb-1.5 font-medium">
+   600→                      Previous Project
+   601→                    </p>
+   602→                    <p className="text-white/80 text-sm font-medium truncate group-hover:text-electric-blue transition-colors duration-300">
+   603→                      {prevProject.title}
+   604→                    </p>
+   605→                    <p className="text-white/20 text-[11px] mt-1 truncate">
+   606→                      {prevProject.category}
+   607→                    </p>
+   608→                  </div>
+   609→                </button>
+   610→              </AnimatedSection>
+   611→            ) : (
+   612→              <div />
+   613→            )}
+   614→
+   615→            {nextProject ? (
+   616→              <AnimatedSection delay={0.08}>
+   617→                <button
+   618→                  onClick={goNext}
+   619→                  className="group flex items-center justify-end gap-4 text-right w-full p-6 rounded-xl border border-white/[0.06] hover:border-electric-blue/20 hover:bg-white/[0.015] transition-all duration-400"
+   620→                >
+   621→                  <div className="min-w-0">
+   622→                    <p className="text-[10px] uppercase tracking-[0.15em] text-white/15 mb-1.5 font-medium">
+   623→                      Next Project
+   624→                    </p>
+   625→                    <p className="text-white/80 text-sm font-medium truncate group-hover:text-electric-blue transition-colors duration-300">
+   626→                      {nextProject.title}
+   627→                    </p>
+   628→                    <p className="text-white/20 text-[11px] mt-1 truncate">
+   629→                      {nextProject.category}
+   630→                    </p>
+   631→                  </div>
+   632→                  <div className="w-8 h-8 flex items-center justify-center rounded-full border border-white/[0.08] group-hover:border-electric-blue/30 transition-colors duration-300 flex-shrink-0">
+   633→                    <ArrowRight className="w-3.5 h-3.5 text-matte-silver/30 group-hover:text-electric-blue transition-colors duration-300" />
+   634→                  </div>
+   635→                </button>
+   636→              </AnimatedSection>
+   637→            ) : (
+   638→              <div />
+   639→            )}
+   640→          </div>
+   641→
+   642→          {/* Back to Work */}
+   643→          <AnimatedSection className="mt-8" delay={0.15}>
+   644→            <button
+   645→              onClick={() => navigate('work')}
+   646→              className="inline-flex items-center gap-2 text-white/25 text-sm font-light hover:text-white/60 transition-colors duration-300"
+   647→            >
+   648→              <ArrowLeft className="w-3.5 h-3.5" />
+   649→              Back to All Projects
+   650→            </button>
+   651→          </AnimatedSection>
+   652→        </div>
+   653→      </section>
+   654→
+   655→      {/* ═══════════════════════════════════════════════════════
+   656→          CTA SECTION
+   657→          ═══════════════════════════════════════════════════════ */}
+   658→      <section className="py-16 md:py-24 bg-surface-secondary relative overflow-hidden">
+   659→        {/* Subtle radial glow */}
+   660→        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(37,99,235,0.04)_0%,transparent_65%)] pointer-events-none" />
+   661→
+   662→        <div className="relative max-w-2xl mx-auto px-6 text-center">
+   663→          <AnimatedSection>
+   664→            <div className="w-10 h-px bg-electric-blue/40 mx-auto mb-8" />
+   665→            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white tracking-tight leading-tight">
+   666→              Ready to Create Something
+   667→              <br className="hidden md:block" /> Extraordinary?
+   668→            </h2>
+   669→            <p className="text-matte-silver/60 text-sm md:text-base mt-5 leading-relaxed font-light max-w-md mx-auto">
+   670→              Let&apos;s create a cinematic experience for your next launch.
+   671→            </p>
+   672→            <div className="flex flex-wrap items-center justify-center gap-4 mt-10">
+   673→              <a
+   674→                href="https://calendly.com/salomeaicreate/sreallabs-discovery-call"
+   675→                target="_blank"
+   676→                rel="noopener noreferrer"
+   677→                className="inline-flex items-center gap-2 bg-electric-blue hover:bg-electric-blue/85 text-white text-sm font-medium px-7 py-3.5 rounded-full transition-all duration-300 hover:shadow-[0_0_30px_rgba(37,99,235,0.25)]"
+   678→              >
+   679→                Book Discovery Call
+   680→                <ArrowUpRight className="w-3.5 h-3.5 opacity-60" />
+   681→              </a>
+   682→              <button
+   683→                onClick={() => navigate('work')}
+   684→                className="border border-white/15 text-white/70 text-sm font-medium px-7 py-3.5 rounded-full hover:bg-white/[0.04] hover:text-white hover:border-white/25 transition-all duration-300"
+   685→              >
+   686→                View More Projects
+   687→              </button>
+   688→            </div>
+   689→          </AnimatedSection>
+   690→        </div>
+   691→      </section>
+   692→
+   693→      {/* ═══════════════════════════════════════════════════════
+   694→          GALLERY LIGHTBOX (portal-style overlay)
+   695→          ═══════════════════════════════════════════════════════ */}
+   696→      {lightboxOpen && hasGallery && (
+   697→        <GalleryLightbox
+   698→          images={project.additionalImages!}
+   699→          initialIndex={lightboxIndex}
+   700→          onClose={() => setLightboxOpen(false)}
+   701→        />
+   702→      )}
+   703→    </div>
+   704→  )
+   705→}

@@ -21,19 +21,19 @@ const creativeCollections = [
   {
     title: 'Product Cinema',
     description: 'Our finest 3D product animations',
-    category: '3D Product Animation' as PortfolioCategory,
+    category: 'Consumer Electronics' as PortfolioCategory,
     icon: '🎬',
   },
   {
-    title: 'AI Stories',
-    description: 'AI-powered commercials and UGC',
-    category: 'AI UGC' as PortfolioCategory,
-    icon: '✨',
+    title: 'Industrial Precision',
+    description: 'Enterprise and hardware visualization',
+    category: 'Industrial Hardware' as PortfolioCategory,
+    icon: '⚙️',
   },
   {
     title: 'Digital Luxury',
     description: 'Premium content for luxury brands',
-    category: 'Luxury' as PortfolioCategory,
+    category: 'Luxury Products' as PortfolioCategory,
     icon: '💎',
   },
 ]
@@ -168,7 +168,7 @@ export default function WorkPage() {
               Work
             </h1>
             <p className="text-matte-silver text-base md:text-lg mt-4 max-w-xl leading-relaxed">
-              Every project is a story. Here are ours. Explore our complete collection of cinematic 3D animations, AI commercials, and creative projects.
+              Every project is a story. Here are ours. Explore our complete collection of premium product films, cinematic animations, and visual storytelling.
             </p>
           </motion.div>
         </div>
@@ -211,8 +211,8 @@ export default function WorkPage() {
       <section ref={filterRef} className="py-14 md:py-20 bg-surface-secondary">
         <div className="max-w-7xl mx-auto px-6">
           <SectionHeading
-            title="Browse by Service"
-            subtitle="Filter our work by category to find exactly what you need"
+            title="Browse by Industry"
+            subtitle="Explore our work by the industries and markets we serve"
           />
 
           {/* Filter Pills */}
@@ -264,7 +264,7 @@ export default function WorkPage() {
         <div className="max-w-7xl mx-auto px-6">
           <SectionHeading
             title="Creative Collections"
-            subtitle="Curated groups of our best work by theme"
+            subtitle="Curated groups of our best work by industry"
           />
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5 mt-8">

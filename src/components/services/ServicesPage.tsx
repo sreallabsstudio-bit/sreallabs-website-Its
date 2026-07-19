@@ -19,32 +19,32 @@ const services = [
   {
     icon: Film,
     title: '3D Product Animation',
-    description: 'Cinematic product reveals and demonstrations using photorealistic 3D rendering, dramatic lighting, and dynamic camera work that showcase every detail of your product.',
-    longDescription: 'Our 3D product animation service creates stunning visual content that brings products to life. Using industry-leading rendering technology, we produce photorealistic animations that highlight material quality, design details, and product features in ways traditional photography simply cannot achieve. Every animation is crafted with cinematic camera work, premium lighting setups, and meticulous attention to detail.',
+    description: 'Create launch-ready product films that increase perceived value and capture attention.',
+    longDescription: 'Our 3D product animation service produces cinematic product films that do more than showcase features — they elevate how customers perceive your product. Using photorealistic rendering, dramatic lighting, and dynamic camera work, we create content that increases perceived value, improves click-through rates on product listings, and gives your brand a premium visual presence across every platform.',
     features: ['Photorealistic Rendering', 'Dynamic Camera Work', 'Material Accuracy', 'Amazon & E-commerce Ready', 'Fast Turnaround', 'Multiple Format Delivery'],
     serviceProjectId: '3d-5',
   },
   {
     icon: Sparkles,
     title: 'AI Commercials',
-    description: 'AI-generated commercial content that looks and feels authentic. Perfect for brands looking to scale their advertising creative across multiple platforms and markets.',
-    longDescription: 'Our AI commercial service leverages cutting-edge generative AI to produce broadcast-quality commercial content at a fraction of traditional production costs. We create human-presented content, lifestyle integrations, and brand films that feel genuine and relatable. Each commercial is optimized for the platforms where your audience spends time, from social media feeds to Connected TV.',
+    description: 'Produce campaign-ready advertising content faster without sacrificing quality.',
+    longDescription: 'Our AI commercial service leverages cutting-edge generative AI combined with professional post-production to produce broadcast-quality advertising content at a fraction of traditional production costs. We create content that looks and feels authentic, optimized for performance across social media, Connected TV, and digital advertising platforms. The result is scalable ad creative that maintains the premium quality your brand demands.',
     features: ['AI-Generated Visuals', 'Brand Consistency', 'Rapid Production', 'Multi-Platform Optimization', 'Scalable Content', 'Founder & Testimonial Style'],
     serviceProjectId: 'beauty-2',
   },
   {
     icon: Users,
     title: 'AI UGC',
-    description: 'Scalable creator-style content powered by artificial intelligence. Get authentic-feeling UGC without the logistics, costs, and unpredictability of real creator partnerships.',
-    longDescription: 'AI UGC is revolutionizing how brands approach social media marketing. Our service generates creator-style product demonstrations, unboxing videos, and lifestyle content that feels authentic and relatable. Each piece of content is designed to perform on social platforms, with natural presentation styles and genuine-feeling engagement patterns that resonate with modern audiences.',
+    description: 'Generate authentic creator-style advertising content at scale.',
+    longDescription: 'AI UGC is revolutionizing how brands approach social media marketing. Our service generates creator-style product demonstrations, unboxing videos, and lifestyle content that feels authentic and relatable. Each piece is designed to perform on social platforms, with natural presentation styles and genuine-feeling engagement patterns that resonate with modern audiences — all without the logistics, costs, and unpredictability of real creator partnerships.',
     features: ['Creator-Style Content', 'Infinite Variations', 'Cost Effective', 'Rapid Turnaround', 'Platform Native', 'A/B Test Ready'],
     serviceProjectId: 'ugc-3',
   },
   {
     icon: Monitor,
     title: 'SaaS Product Videos',
-    description: 'Compelling visual stories for software products and platforms, turning complex features into engaging narratives that drive sign-ups and reduce churn.',
-    longDescription: 'SaaS products present unique storytelling challenges — abstract features, invisible value, and technical complexity. Our SaaS video service transforms these challenges into compelling visual narratives. We create product demos, founder stories, workflow visualizations, and brand films that make software products tangible, understandable, and desirable for their target audiences.',
+    description: 'Turn complex software into engaging visual stories that improve product understanding.',
+    longDescription: 'SaaS products present unique storytelling challenges — abstract features, invisible value, and technical complexity. Our SaaS video service transforms these challenges into compelling visual narratives. We create product demos, founder stories, workflow visualizations, and brand films that make software products tangible, understandable, and desirable — driving sign-ups, reducing churn, and improving product-led growth.',
     features: ['Feature Demos', 'UI Animations', 'Explainer Videos', 'Founder Stories', 'Workflow Visualizations', 'Conversion Optimized'],
     serviceProjectId: 'saas-2',
   },
@@ -54,22 +54,22 @@ const processSteps = [
   {
     num: '01',
     title: 'Discovery',
-    description: 'We learn about your brand, goals, and vision through a free consultation call. We study your market, competitors, and audience to build a strong creative foundation.',
+    description: 'Understand the product, audience, and brand positioning. We study your market, competitors, and goals to build a strong creative foundation.',
   },
   {
     num: '02',
     title: 'Strategy',
-    description: 'We develop a creative strategy and production plan tailored to your objectives. This includes storyboards, visual direction, and a detailed timeline.',
+    description: 'Develop visual direction and creative strategy. Every decision — from camera angles to lighting mood — is designed to increase perceived product value.',
   },
   {
     num: '03',
     title: 'Production',
-    description: 'Our team crafts your content using cutting-edge 3D rendering and AI technology. Every frame is polished to cinematic standards with premium lighting and materials.',
+    description: 'Craft cinematic content using industry-leading 3D rendering and AI technology. Every frame is polished to premium standards.',
   },
   {
     num: '04',
     title: 'Delivery',
-    description: 'You receive polished, platform-optimized assets ready to deploy. We provide multiple formats and revisions to ensure everything meets your standards.',
+    description: 'Launch-ready marketing assets optimized for every platform. From Amazon to social campaigns to investor presentations.',
   },
 ]
 
@@ -97,7 +97,7 @@ const serviceFaqs = [
 ]
 
 export default function ServicesPage() {
-  const { navigate, openProject } = useNavigation()
+  const { navigate, navigateToProject } = useNavigation()
   const featuredProjects = getFeaturedProjects().slice(0, 6)
 
   return (
@@ -115,7 +115,7 @@ export default function ServicesPage() {
               Services
             </h1>
             <p className="text-matte-silver text-base md:text-lg mt-4 max-w-xl leading-relaxed">
-              End-to-end creative services designed to elevate your brand and drive measurable results across every platform.
+              Premium visual content designed to increase perceived product value and drive measurable business outcomes.
             </p>
           </motion.div>
         </div>
@@ -127,7 +127,7 @@ export default function ServicesPage() {
           <div className="max-w-3xl">
             <AnimatedSection>
               <p className="text-matte-silver text-base md:text-lg leading-relaxed">
-                At SREALLABS, we don&apos;t just create videos — we engineer visual experiences that convert. Our approach combines the artistry of traditional filmmaking with the precision of modern technology, delivering content that performs as beautifully as it looks.
+                At SREALLABS, we don&apos;t just create videos — we engineer visual experiences that make products feel premium. Our approach combines the artistry of traditional filmmaking with the precision of modern technology, delivering content that performs as beautifully as it looks.
               </p>
             </AnimatedSection>
             <AnimatedSection delay={0.15}>
@@ -189,7 +189,7 @@ export default function ServicesPage() {
                     {sampleProject ? (
                       <div
                         className="relative aspect-video rounded-xl overflow-hidden cursor-pointer group"
-                        onClick={() => openProject(sampleProject.id)}
+                        onClick={() => navigateToProject(sampleProject.slug)}
                       >
                         <video
                           src={sampleProject.video}
@@ -231,7 +231,7 @@ export default function ServicesPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5 mt-8">
             {featuredProjects.map((p) => (
               <AnimatedSection key={p.id}>
-                <PortfolioCard project={p} onClick={() => openProject(p.id)} />
+                <PortfolioCard project={p} onClick={() => navigateToProject(p.slug)} />
               </AnimatedSection>
             ))}
           </div>
@@ -327,10 +327,10 @@ export default function ServicesPage() {
         <div className="relative max-w-2xl mx-auto px-6 text-center">
           <AnimatedSection>
             <h2 className="text-2xl md:text-4xl font-bold text-white">
-              Ready to Get Started?
+              Ready to Make Your Product Feel Premium?
             </h2>
             <p className="text-matte-silver mt-4 text-sm md:text-base leading-relaxed">
-              Let&apos;s discuss your project and find the perfect creative solution. Every great project starts with a conversation.
+              Whether you&apos;re launching a new product or scaling your content production, we&apos;ll help you create visuals that increase perceived value and drive results.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-4 mt-6">
               <a

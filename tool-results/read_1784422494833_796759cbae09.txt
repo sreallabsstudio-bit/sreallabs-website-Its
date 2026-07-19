@@ -1,0 +1,788 @@
+     1→'use client'
+     2→
+     3→import { motion } from 'framer-motion'
+     4→import {
+     5→  ArrowRight,
+     6→  Play,
+     7→  Eye,
+     8→  Lightbulb,
+     9→  Palette,
+    10→  Film,
+    11→  Layers,
+    12→  Monitor,
+    13→  Sparkles,
+    14→  Users,
+    15→  CheckCircle2,
+    16→  Cpu,
+    17→  CircuitBoard,
+    18→  Gem,
+    19→  Car,
+    20→  Code2,
+    21→  ShoppingBag,
+    22→} from 'lucide-react'
+    23→import { siteConfig } from '@/data/siteConfig'
+    24→import { getFeaturedProjects, getProjectBySlug } from '@/data/portfolio'
+    25→import { useNavigation } from '@/store/navigation'
+    26→import AnimatedSection from '@/components/shared/AnimatedSection'
+    27→import SectionHeading from '@/components/shared/SectionHeading'
+    28→import PortfolioCard from '@/components/shared/PortfolioCard'
+    29→import TestimonialsSection from '@/components/home/TestimonialsSection'
+    30→import {
+    31→  Accordion,
+    32→  AccordionItem,
+    33→  AccordionTrigger,
+    34→  AccordionContent,
+    35→} from '@/components/ui/accordion'
+    36→
+    37→/* ═══════════════════════════════════════════════════════════════
+    38→   DATA
+    39→   ═══════════════════════════════════════════════════════════════ */
+    40→
+    41→const flagshipProject = getProjectBySlug('shark-ai-ultra-robot-vacuum') || getFeaturedProjects()[0]
+    42→
+    43→const premiumServices = [
+    44→  {
+    45→    icon: Film,
+    46→    title: '3D Product Animation',
+    47→    description:
+    48→      'Create launch-ready product films that increase perceived value and capture attention.',
+    49→    features: ['Photorealistic Rendering', 'Cinematic Camera Work', 'Material Accuracy', 'Platform Optimized'],
+    50→  },
+    51→  {
+    52→    icon: Eye,
+    53→    title: 'Cinematic Product Films',
+    54→    description:
+    55→      'Transform product features into compelling visual stories that resonate with your target audience and drive engagement.',
+    56→    features: ['Dramatic Lighting', 'Brand Storytelling', 'Multi-Scene Narratives', 'Campaign Ready'],
+    57→  },
+    58→  {
+    59→    icon: CircuitBoard,
+    60→    title: 'Industrial Visualization',
+    61→    description:
+    62→      'Make complex industrial and enterprise products visually accessible with technical accuracy and cinematic quality.',
+    63→    features: ['Exploded Views', 'Technical Accuracy', 'Enterprise Grade', 'Sales Enablement'],
+    64→  },
+    65→  {
+    66→    icon: Gem,
+    67→    title: 'Luxury Product Visualization',
+    68→    description:
+    69→      'Elevate luxury and premium brands with visual content that matches the quality and craftsmanship of your products.',
+    70→    features: ['Premium Aesthetics', 'Brand Alignment', 'Editorial Quality', 'High-End Finish'],
+    71→  },
+    72→]
+    73→
+    74→const aiServices = [
+    75→  {
+    76→    icon: Sparkles,
+    77→    title: 'AI Commercials',
+    78→    description:
+    79→      'Produce campaign-ready advertising content faster without sacrificing quality.',
+    80→    features: ['AI-Generated Visuals', 'Brand Consistency', 'Rapid Production', 'Multi-Platform'],
+    81→  },
+    82→  {
+    83→    icon: Users,
+    84→    title: 'AI UGC',
+    85→    description:
+    86→      'Generate authentic creator-style advertising content at scale.',
+    87→    features: ['Creator-Style Content', 'Infinite Variations', 'Cost Effective', 'Platform Native'],
+    88→  },
+    89→  {
+    90→    icon: Monitor,
+    91→    title: 'AI Product Videos',
+    92→    description:
+    93→      'Turn complex software and digital products into engaging visual stories that improve product understanding and conversion.',
+    94→    features: ['Feature Demos', 'UI Animations', 'Explainer Videos', 'Conversion Optimized'],
+    95→  },
+    96→]
+    97→
+    98→const processSteps = [
+    99→  {
+   100→    num: '01',
+   101→    title: 'Discover',
+   102→    description: 'Understand the product, audience, and brand positioning. We study your market, competitors, and goals to build a strong creative foundation that aligns with your business objectives.',
+   103→    icon: Lightbulb,
+   104→  },
+   105→  {
+   106→    num: '02',
+   107→    title: 'Design',
+   108→    description: 'Develop the visual direction, storyboard, and creative strategy. Every decision — from camera angles to lighting mood — is intentional and designed to increase perceived product value.',
+   109→    icon: Palette,
+   110→  },
+   111→  {
+   112→    num: '03',
+   113→    title: 'Create',
+   114→    description: 'Build cinematic animation and visual content using industry-leading 3D rendering and AI technology. Every frame is polished to premium standards with meticulous attention to detail.',
+   115→    icon: Layers,
+   116→  },
+   117→  {
+   118→    num: '04',
+   119→    title: 'Deliver',
+   120→    description: 'Launch-ready marketing assets optimized for every platform. From Amazon listings to social campaigns to investor presentations — content that performs where it matters most.',
+   121→    icon: CheckCircle2,
+   122→  },
+   123→]
+   124→
+   125→const industries = [
+   126→  {
+   127→    icon: Cpu,
+   128→    title: 'Consumer Electronics',
+   129→    description: 'From smart home devices to wearables — we create product visuals that communicate quality, innovation, and desirability for tech brands competing in crowded markets.',
+   130→  },
+   131→  {
+   132→    icon: CircuitBoard,
+   133→    title: 'Industrial Equipment',
+   134→    description: 'Make complex machinery and enterprise hardware visually compelling. We bridge the gap between engineering precision and marketing appeal for B2B and industrial brands.',
+   135→  },
+   136→  {
+   137→    icon: Gem,
+   138→    title: 'Luxury Brands',
+   139→    description: 'Visual content that reflects the craftsmanship, heritage, and exclusivity of luxury products. Every frame is designed to match the premium positioning your brand deserves.',
+   140→  },
+   141→  {
+   142→    icon: Car,
+   143→    title: 'Automotive & EV',
+   144→    description: 'Showcase automotive design, engineering, and innovation through cinematic product films that capture the essence of modern mobility and electric vehicle technology.',
+   145→  },
+   146→  {
+   147→    icon: Code2,
+   148→    title: 'SaaS & Technology',
+   149→    description: 'Turn abstract software features into tangible visual stories. We help SaaS companies improve product understanding, reduce churn, and increase sign-ups through compelling video content.',
+   150→  },
+   151→  {
+   152→    icon: ShoppingBag,
+   153→    title: 'Lifestyle Products',
+   154→    description: 'From beauty and wellness to home goods and fitness — create aspirational product content that connects emotionally with consumers and drives purchase decisions.',
+   155→  },
+   156→]
+   157→
+   158→const faqs = [
+   159→  {
+   160→    q: 'How much does a project cost?',
+   161→    a: 'Pricing depends on the project scope, complexity, and number of deliverables. A single 3D product animation typically starts from a set base rate, while AI-powered content packages offer greater scale at a lower per-unit cost. Every project begins with a free discovery call where we discuss your goals and provide a personalized quote tailored to your budget and objectives.',
+   162→  },
+   163→  {
+   164→    q: 'How long does production take?',
+   165→    a: 'Project timelines vary based on complexity and deliverable count. A standard 3D product animation is typically delivered within 1-2 weeks, while AI-powered content can be turned around in as little as 3-5 days. More complex projects involving multiple products, scenes, or advanced visual effects may take 2-4 weeks. We provide a detailed timeline during our discovery call and keep you updated at every stage.',
+   166→  },
+   167→  {
+   168→    q: 'Can you work with existing CAD files?',
+   169→    a: 'Yes, we regularly work with CAD files, 3D models, technical drawings, and product prototypes. If you have existing 3D assets, we can optimize and refine them for cinematic rendering. If not, our modeling team can create photorealistic 3D models from reference photos, specifications, or physical products. We accommodate virtually any starting point.',
+   170→  },
+   171→  {
+   172→    q: 'Do you create marketing-ready videos?',
+   173→    a: 'Every video we deliver is marketing-ready. We optimize for your target platforms — whether that is Amazon product listings, Instagram Reels, TikTok, LinkedIn, YouTube pre-rolls, Connected TV, or your website. Each deliverable comes in the correct aspect ratio, duration, and format for its intended platform, ready to deploy immediately.',
+   174→  },
+   175→  {
+   176→    q: 'Can you create AI UGC campaigns?',
+   177→    a: 'Absolutely. Our AI UGC service generates authentic creator-style content at scale — perfect for brands that need a high volume of social media content without the logistics, costs, and unpredictability of real creator partnerships. We produce content that looks and feels genuine, optimized for performance on social platforms.',
+   178→  },
+   179→  {
+   180→    q: 'What industries do you specialize in?',
+   181→    a: 'We work across six primary industries: Consumer Electronics, Industrial Hardware, Luxury Products, Automotive & EV, SaaS & Technology, and Lifestyle & Consumer Goods. Our experience spans over 50 projects in these categories, giving us deep domain knowledge that translates into more effective creative work for our clients.',
+   182→  },
+   183→  {
+   184→    q: 'What makes SREALLABS different?',
+   185→    a: 'We focus exclusively on making products feel premium through cinematic visual storytelling. Unlike studios that offer generic video production, every project we create is designed to increase perceived product value and drive measurable business outcomes. We combine the artistry of traditional 3D animation with the efficiency of AI-powered tools — delivering Hollywood-grade content at a fraction of traditional production costs.',
+   186→  },
+   187→]
+   188→
+   189→const stagger = {
+   190→  hidden: { opacity: 0 },
+   191→  visible: (i: number) => ({
+   192→    opacity: 1,
+   193→    y: 0,
+   194→    transition: { delay: i * 0.2, duration: 0.6, ease: [0.25, 0.4, 0.25, 1] },
+   195→  }),
+   196→}
+   197→
+   198→/* ═══════════════════════════════════════════════════════════════
+   199→   HOMEPAGE
+   200→   ═══════════════════════════════════════════════════════════════ */
+   201→
+   202→export default function HomePage() {
+   203→  const { navigate, navigateToProject } = useNavigation()
+   204→
+   205→  const featuredProjects = getFeaturedProjects().slice(0, 4)
+   206→
+   207→  return (
+   208→    <div>
+   209→      {/* ===== HERO ===== */}
+   210→      <section className="relative min-h-screen overflow-hidden">
+   211→        {/* Background Video */}
+   212→        <motion.div
+   213→          initial={{ opacity: 0 }}
+   214→          animate={{ opacity: 1 }}
+   215→          transition={{ duration: 1 }}
+   216→          className="absolute inset-0"
+   217→        >
+   218→          <video
+   219→            src={siteConfig.assets.heroShowreel}
+   220→            autoPlay
+   221→            muted
+   222→            loop
+   223→            playsInline
+   224→            className="w-full h-full object-cover"
+   225→          />
+   226→        </motion.div>
+   227→
+   228→        {/* Gradient Overlay */}
+   229→        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
+   230→        <div className="absolute inset-0 bg-gradient-to-t from-obsidian via-transparent to-transparent" />
+   231→
+   232→        {/* Content */}
+   233→        <div className="relative z-10 flex flex-col justify-center h-full min-h-screen max-w-7xl mx-auto px-6">
+   234→          <motion.h1
+   235→            custom={0}
+   236→            initial="hidden"
+   237→            animate="visible"
+   238→            variants={stagger}
+   239→            className="text-4xl md:text-6xl lg:text-7xl font-bold text-white tracking-tight max-w-3xl"
+   240→          >
+   241→            We Make Products Feel Premium.
+   242→          </motion.h1>
+   243→
+   244→          <motion.p
+   245→            custom={1}
+   246→            initial="hidden"
+   247→            animate="visible"
+   248→            variants={stagger}
+   249→            className="text-matte-silver text-base md:text-lg mt-4 max-w-xl leading-relaxed"
+   250→          >
+   251→            We create cinematic product films, 3D animation and AI-powered visual
+   252→            storytelling that help ambitious brands launch better products, increase
+   253→            perceived value and capture attention.
+   254→          </motion.p>
+   255→
+   256→          <motion.div
+   257→            custom={2}
+   258→            initial="hidden"
+   259→            animate="visible"
+   260→            variants={stagger}
+   261→            className="flex flex-wrap gap-4 mt-6"
+   262→          >
+   263→            <button
+   264→              onClick={() => navigate('work')}
+   265→              className="bg-electric-blue text-white px-6 py-3 rounded-full font-medium text-sm hover:bg-electric-blue/90 transition-colors"
+   266→            >
+   267→              View Selected Work
+   268→            </button>
+   269→            <a
+   270→              href={siteConfig.calendlyUrl}
+   271→              target="_blank"
+   272→              rel="noopener noreferrer"
+   273→              className="border border-white/20 text-white px-6 py-3 rounded-full font-medium text-sm hover:bg-white/5 transition-colors"
+   274→            >
+   275→              Book a Discovery Call
+   276→            </a>
+   277→          </motion.div>
+   278→        </div>
+   279→      </section>
+   280→
+   281→      {/* ===== HERO CASE STUDY ===== */}
+   282→      {flagshipProject && (
+   283→        <section className="py-14 md:py-20 bg-obsidian">
+   284→          <div className="max-w-7xl mx-auto px-6">
+   285→            <AnimatedSection>
+   286→              <p className="text-electric-blue text-xs uppercase tracking-[0.2em] font-medium">
+   287→                Featured Case Study
+   288→              </p>
+   289→            </AnimatedSection>
+   290→
+   291→            {/* Video */}
+   292→            <AnimatedSection className="mt-6" delay={0.1}>
+   293→              <div
+   294→                className="relative aspect-video rounded-2xl overflow-hidden cursor-pointer group"
+   295→                onClick={() => navigateToProject(flagshipProject.slug)}
+   296→              >
+   297→                <video
+   298→                  src={flagshipProject.video}
+   299→                  muted
+   300→                  loop
+   301→                  playsInline
+   302→                  preload="metadata"
+   303→                  className="w-full h-full object-cover"
+   304→                  onMouseEnter={(e) => (e.target as HTMLVideoElement).play().catch(() => {})}
+   305→                  onMouseLeave={(e) => {
+   306→                    const v = e.target as HTMLVideoElement
+   307→                    v.pause()
+   308→                    v.currentTime = 0
+   309→                  }}
+   310→                />
+   311→                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+   312→                {/* Play button */}
+   313→                <div className="absolute inset-0 flex items-center justify-center">
+   314→                  <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 border border-white/20">
+   315→                    <Play className="w-6 h-6 md:w-7 md:h-7 text-white ml-1" />
+   316→                  </div>
+   317→                </div>
+   318→              </div>
+   319→            </AnimatedSection>
+   320→
+   321→            {/* Case Study Content */}
+   322→            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 mt-10 md:mt-12">
+   323→              <div>
+   324→                <AnimatedSection delay={0.15}>
+   325→                  <h3 className="text-2xl md:text-3xl font-semibold text-white tracking-tight">
+   326→                    {flagshipProject.client || flagshipProject.title}
+   327→                  </h3>
+   328→                  <p className="text-matte-silver/60 text-sm mt-1">
+   329→                    {flagshipProject.industry} &middot; {flagshipProject.service}
+   330→                  </p>
+   331→                </AnimatedSection>
+   332→
+   333→                <AnimatedSection delay={0.2}>
+   334→                  <p className="text-matte-silver text-sm leading-relaxed mt-5">
+   335→                    {flagshipProject.challenge}
+   336→                  </p>
+   337→                </AnimatedSection>
+   338→              </div>
+   339→
+   340→              <div className="flex flex-col gap-5">
+   341→                <AnimatedSection delay={0.25}>
+   342→                  <div>
+   343→                    <p className="text-electric-blue text-[10px] uppercase tracking-[0.2em] font-medium mb-2">
+   344→                      Approach
+   345→                    </p>
+   346→                    <p className="text-matte-silver text-sm leading-relaxed">
+   347→                      {flagshipProject.solution}
+   348→                    </p>
+   349→                  </div>
+   350→                </AnimatedSection>
+   351→
+   352→                <AnimatedSection delay={0.3}>
+   353→                  <div>
+   354→                    <p className="text-electric-blue text-[10px] uppercase tracking-[0.2em] font-medium mb-2">
+   355→                      Result
+   356→                    </p>
+   357→                    <p className="text-matte-silver text-sm leading-relaxed">
+   358→                      {flagshipProject.result}
+   359→                    </p>
+   360→                  </div>
+   361→                </AnimatedSection>
+   362→
+   363→                <AnimatedSection delay={0.35}>
+   364→                  <button
+   365→                    onClick={() => navigateToProject(flagshipProject.slug)}
+   366→                    className="inline-flex items-center gap-2 text-electric-blue text-sm font-medium hover:gap-3 transition-all w-fit"
+   367→                  >
+   368→                    View Full Case Study <ArrowRight className="w-4 h-4" />
+   369→                  </button>
+   370→                </AnimatedSection>
+   371→              </div>
+   372→            </div>
+   373→          </div>
+   374→        </section>
+   375→      )}
+   376→
+   377→      {/* ===== SELECTED WORK ===== */}
+   378→      <section className="py-14 md:py-20 bg-obsidian">
+   379→        <div className="max-w-7xl mx-auto px-6">
+   380→          <SectionHeading
+   381→            title="Selected Work"
+   382→            subtitle="A curated collection of premium product films, cinematic animations and visual storytelling created for ambitious brands."
+   383→          />
+   384→
+   385→          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-8">
+   386→            {featuredProjects.map((p, i) => (
+   387→              <PortfolioCard
+   388→                key={p.id}
+   389→                project={p}
+   390→                onClick={() => navigateToProject(p.slug)}
+   391→                index={i}
+   392→              />
+   393→            ))}
+   394→          </div>
+   395→
+   396→          <AnimatedSection className="mt-6">
+   397→            <button
+   398→              onClick={() => navigate('work')}
+   399→              className="inline-flex items-center gap-2 text-electric-blue text-sm font-medium hover:gap-3 transition-all"
+   400→            >
+   401→              View All Projects <ArrowRight className="w-4 h-4" />
+   402→            </button>
+   403→          </AnimatedSection>
+   404→        </div>
+   405→      </section>
+   406→
+   407→      {/* ===== CLIENT TESTIMONIALS ===== */}
+   408→      <TestimonialsSection />
+   409→
+   410→      {/* ===== WHY PREMIUM VISUAL STORYTELLING MATTERS ===== */}
+   411→      <section className="py-14 md:py-20 bg-obsidian">
+   412→        <div className="max-w-7xl mx-auto px-6">
+   413→          <SectionHeading
+   414→            title="Why Premium Visual Storytelling Matters"
+   415→            subtitle="The difference between selling a product and making people want it"
+   416→          />
+   417→
+   418→          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mt-8">
+   419→            {/* Before */}
+   420→            <AnimatedSection delay={0.1}>
+   421→              <div className="bg-surface-card rounded-xl p-6 md:p-8 border border-white/[0.06] h-full">
+   422→                <div className="flex items-center gap-3 mb-4">
+   423→                  <div className="w-fit rounded-lg bg-white/5 p-2.5">
+   424→                    <Eye className="w-5 h-5 text-matte-silver/40" />
+   425→                  </div>
+   426→                  <span className="text-matte-silver/40 text-xs uppercase tracking-[0.15em] font-medium">
+   427→                    Traditional Approach
+   428→                  </span>
+   429→                </div>
+   430→                <h3 className="text-white font-medium text-base">
+   431→                  Standard Product Photography
+   432→                </h3>
+   433→                <p className="text-matte-silver/60 text-sm mt-3 leading-relaxed">
+   434→                  Static product shots on white backgrounds. Functional but forgettable. They show what
+   435→                  a product looks like but fail to communicate the quality, craftsmanship, and emotional
+   436→                  appeal that drives purchasing decisions. In competitive markets, this approach blends in
+   437→                  rather than stands out, leaving potential customers uninspired and reducing perceived value.
+   438→                </p>
+   439→                <ul className="mt-4 space-y-2">
+   440→                  {['Flat, static imagery', 'No emotional connection', 'Blends with competitors', 'Limited storytelling'].map((item) => (
+   441→                    <li key={item} className="flex items-start gap-2.5">
+   442→                      <div className="w-1 h-1 rounded-full bg-matte-silver/30 mt-2 flex-shrink-0" />
+   443→                      <span className="text-matte-silver/50 text-sm">{item}</span>
+   444→                    </li>
+   445→                  ))}
+   446→                </ul>
+   447→              </div>
+   448→            </AnimatedSection>
+   449→
+   450→            {/* After */}
+   451→            <AnimatedSection delay={0.2}>
+   452→              <div className="bg-surface-card rounded-xl p-6 md:p-8 border border-electric-blue/20 h-full relative overflow-hidden">
+   453→                <div className="absolute top-0 right-0 w-32 h-32 bg-electric-blue/5 rounded-full blur-3xl pointer-events-none" />
+   454→                <div className="relative">
+   455→                  <div className="flex items-center gap-3 mb-4">
+   456→                    <div className="w-fit rounded-lg bg-electric-blue/10 p-2.5">
+   457→                      <Film className="w-5 h-5 text-electric-blue" />
+   458→                    </div>
+   459→                    <span className="text-electric-blue text-xs uppercase tracking-[0.15em] font-medium">
+   460→                      SREALLABS Approach
+   461→                    </span>
+   462→                  </div>
+   463→                  <h3 className="text-white font-medium text-base">
+   464→                    Cinematic Product Visualization
+   465→                  </h3>
+   466→                  <p className="text-matte-silver text-sm mt-3 leading-relaxed">
+   467→                    Dynamic, film-quality content that showcases every detail, material, and feature of your
+   468→                    product through dramatic camera work, photorealistic rendering, and purposeful lighting.
+   469→                    This approach transforms how customers perceive your product — increasing perceived value,
+   470→                    building brand equity, and creating content that stops scrollers and drives action across
+   471→                    every platform.
+   472→                  </p>
+   473→                  <ul className="mt-4 space-y-2">
+   474→                    {['Cinematic quality and motion', 'Emotional brand connection', 'Stands out in any feed', 'Compelling product narrative'].map((item) => (
+   475→                      <li key={item} className="flex items-start gap-2.5">
+   476→                        <CheckCircle2 className="w-4 h-4 text-electric-blue mt-0.5 flex-shrink-0" />
+   477→                        <span className="text-matte-silver text-sm">{item}</span>
+   478→                      </li>
+   479→                    ))}
+   480→                  </ul>
+   481→                </div>
+   482→              </div>
+   483→            </AnimatedSection>
+   484→          </div>
+   485→        </div>
+   486→      </section>
+   487→
+   488→      {/* ===== PREMIUM SERVICES ===== */}
+   489→      <section className="py-14 md:py-20 bg-surface-secondary">
+   490→        <div className="max-w-7xl mx-auto px-6">
+   491→          <SectionHeading
+   492→            title="Premium Creative Services"
+   493→            subtitle="Cinematic visual content designed to increase perceived product value"
+   494→          />
+   495→
+   496→          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-8">
+   497→            {premiumServices.map((s, i) => (
+   498→              <AnimatedSection key={s.title} delay={i * 0.08}>
+   499→                <div className="bg-surface-card rounded-xl p-5 md:p-6 border border-white/[0.06] hover:border-electric-blue/30 hover:shadow-[0_0_20px_rgba(37,99,235,0.1)] transition-all h-full">
+   500→                  <div className="flex items-center gap-3 mb-4">
+   501→                    <div className="w-fit rounded-lg bg-electric-blue/10 p-2.5">
+   502→                      <s.icon className="w-5 h-5 text-electric-blue" />
+   503→                    </div>
+   504→                    <h3 className="text-white font-medium text-base">{s.title}</h3>
+   505→                  </div>
+   506→                  <p className="text-matte-silver text-sm leading-relaxed">
+   507→                    {s.description}
+   508→                  </p>
+   509→                  <ul className="mt-4 space-y-1.5">
+   510→                    {s.features.map((f) => (
+   511→                      <li key={f} className="flex items-start gap-2.5">
+   512→                        <CheckCircle2 className="w-3.5 h-3.5 text-electric-blue/70 mt-0.5 flex-shrink-0" />
+   513→                        <span className="text-matte-silver/70 text-xs">{f}</span>
+   514→                      </li>
+   515→                    ))}
+   516→                  </ul>
+   517→                </div>
+   518→              </AnimatedSection>
+   519→            ))}
+   520→          </div>
+   521→        </div>
+   522→      </section>
+   523→
+   524→      {/* ===== AI CREATIVE SERVICES ===== */}
+   525→      <section className="py-14 md:py-20 bg-obsidian">
+   526→        <div className="max-w-7xl mx-auto px-6">
+   527→          <AnimatedSection>
+   528→            <p className="text-electric-blue text-xs uppercase tracking-[0.2em] font-medium">
+   529→              Scale Without Compromise
+   530→            </p>
+   531→            <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold tracking-tight text-white mt-2">
+   532→              AI Creative Services
+   533→            </h2>
+   534→            <p className="text-matte-silver text-sm md:text-base mt-2 max-w-xl leading-relaxed">
+   535→              Scale your content production without compromising creative quality.
+   536→              AI-powered services for brands that need more content, faster.
+   537→            </p>
+   538→          </AnimatedSection>
+   539→
+   540→          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mt-8">
+   541→            {aiServices.map((s, i) => (
+   542→              <AnimatedSection key={s.title} delay={i * 0.1}>
+   543→                <div className="bg-surface-card rounded-xl p-5 md:p-6 border border-white/[0.06] hover:border-electric-blue/30 hover:shadow-[0_0_20px_rgba(37,99,235,0.1)] transition-all h-full">
+   544→                  <div className="w-fit rounded-lg bg-electric-blue/10 p-2.5 mb-4">
+   545→                    <s.icon className="w-5 h-5 text-electric-blue" />
+   546→                  </div>
+   547→                  <h3 className="text-white font-medium text-base">{s.title}</h3>
+   548→                  <p className="text-matte-silver text-sm mt-2 leading-relaxed">
+   549→                    {s.description}
+   550→                  </p>
+   551→                  <ul className="mt-4 space-y-1.5">
+   552→                    {s.features.map((f) => (
+   553→                      <li key={f} className="flex items-start gap-2.5">
+   554→                        <CheckCircle2 className="w-3.5 h-3.5 text-electric-blue/70 mt-0.5 flex-shrink-0" />
+   555→                        <span className="text-matte-silver/70 text-xs">{f}</span>
+   556→                      </li>
+   557→                    ))}
+   558→                  </ul>
+   559→                </div>
+   560→              </AnimatedSection>
+   561→            ))}
+   562→          </div>
+   563→
+   564→          <AnimatedSection className="mt-6">
+   565→            <button
+   566→              onClick={() => navigate('services')}
+   567→              className="inline-flex items-center gap-2 text-electric-blue text-sm font-medium hover:gap-3 transition-all"
+   568→            >
+   569→              Explore All Services <ArrowRight className="w-4 h-4" />
+   570→            </button>
+   571→          </AnimatedSection>
+   572→        </div>
+   573→      </section>
+   574→
+   575→      {/* ===== PROCESS ===== */}
+   576→      <section className="py-14 md:py-20 bg-surface-secondary">
+   577→        <div className="max-w-7xl mx-auto px-6">
+   578→          <SectionHeading
+   579→            title="How We Bring Products to Life"
+   580→            subtitle="A proven creative workflow that delivers premium results, every time"
+   581→          />
+   582→
+   583→          <div className="mt-8">
+   584→            {/* Desktop Timeline */}
+   585→            <div className="hidden md:grid grid-cols-4 gap-4 md:gap-6">
+   586→              {processSteps.map((step, i) => (
+   587→                <AnimatedSection key={step.num} delay={i * 0.1}>
+   588→                  <div className="relative">
+   589→                    {i < processSteps.length - 1 && (
+   590→                      <div
+   591→                        className="absolute top-7 left-[calc(100%)] w-[calc(100%-3rem)] h-px bg-white/10 hidden lg:block"
+   592→                        style={{ left: '60%', width: '80%' }}
+   593→                      />
+   594→                    )}
+   595→                    <span className="text-electric-blue font-mono text-2xl font-bold">
+   596→                      {step.num}
+   597→                    </span>
+   598→                    <div className="w-fit rounded-lg bg-electric-blue/10 p-2 mt-3">
+   599→                      <step.icon className="w-4 h-4 text-electric-blue" />
+   600→                    </div>
+   601→                    <h3 className="text-white font-medium mt-3 text-base">{step.title}</h3>
+   602→                    <p className="text-matte-silver text-sm mt-2 leading-relaxed">
+   603→                      {step.description}
+   604→                    </p>
+   605→                  </div>
+   606→                </AnimatedSection>
+   607→              ))}
+   608→            </div>
+   609→
+   610→            {/* Mobile Timeline */}
+   611→            <div className="md:hidden space-y-8">
+   612→              {processSteps.map((step, i) => (
+   613→                <AnimatedSection key={step.num} delay={i * 0.1}>
+   614→                  <div className="flex gap-4">
+   615→                    <div className="flex flex-col items-center">
+   616→                      <span className="text-electric-blue font-mono text-lg font-bold">
+   617→                        {step.num}
+   618→                      </span>
+   619→                      {i < processSteps.length - 1 && (
+   620→                        <div className="w-px h-full bg-white/10 mt-2" />
+   621→                      )}
+   622→                    </div>
+   623→                    <div className="pb-6">
+   624→                      <h3 className="text-white font-medium text-base">{step.title}</h3>
+   625→                      <p className="text-matte-silver text-sm mt-2 leading-relaxed">
+   626→                        {step.description}
+   627→                      </p>
+   628→                    </div>
+   629→                  </div>
+   630→                </AnimatedSection>
+   631→              ))}
+   632→            </div>
+   633→          </div>
+   634→        </div>
+   635→      </section>
+   636→
+   637→      {/* ===== INDUSTRIES ===== */}
+   638→      <section className="py-14 md:py-20 bg-obsidian">
+   639→        <div className="max-w-7xl mx-auto px-6">
+   640→          <SectionHeading
+   641→            title="Industries We Serve"
+   642→            subtitle="Deep domain expertise that translates into more effective creative work"
+   643→          />
+   644→
+   645→          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5 mt-8">
+   646→            {industries.map((ind, i) => (
+   647→              <AnimatedSection key={ind.title} delay={i * 0.08}>
+   648→                <div className="bg-surface-card rounded-xl p-5 md:p-6 border border-white/[0.06] hover:border-electric-blue/30 hover:shadow-[0_0_20px_rgba(37,99,235,0.1)] transition-all h-full">
+   649→                  <div className="w-fit rounded-lg bg-electric-blue/10 p-2.5">
+   650→                    <ind.icon className="w-5 h-5 text-electric-blue" />
+   651→                  </div>
+   652→                  <h3 className="text-white font-medium mt-4 text-base">{ind.title}</h3>
+   653→                  <p className="text-matte-silver text-sm mt-2 leading-relaxed">
+   654→                    {ind.description}
+   655→                  </p>
+   656→                </div>
+   657→              </AnimatedSection>
+   658→            ))}
+   659→          </div>
+   660→        </div>
+   661→      </section>
+   662→
+   663→      {/* ===== ABOUT / MEET SALOME ===== */}
+   664→      <section className="py-14 md:py-20 bg-surface-secondary">
+   665→        <div className="max-w-7xl mx-auto px-6">
+   666→          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-14 items-center">
+   667→            {/* Photo */}
+   668→            <AnimatedSection className="order-1 md:order-1">
+   669→              <div className="relative">
+   670→                <img
+   671→                  src={siteConfig.assets.founderPhoto}
+   672→                  alt="Salome — Founder & Creative Director"
+   673→                  className="w-full aspect-[3/4] object-cover rounded-xl"
+   674→                />
+   675→                <div className="absolute inset-0 rounded-xl ring-1 ring-inset ring-electric-blue/20" />
+   676→                <div className="absolute -inset-px rounded-xl shadow-[0_0_40px_rgba(37,99,235,0.1)] pointer-events-none" />
+   677→              </div>
+   678→            </AnimatedSection>
+   679→
+   680→            {/* Text */}
+   681→            <div className="order-2 md:order-2 flex flex-col gap-4">
+   682→              <SectionHeading
+   683→                title="Meet Salome"
+   684→                subtitle="Founder & Creative Director"
+   685→              />
+   686→
+   687→              <AnimatedSection delay={0.2}>
+   688→                <p className="text-matte-silver text-sm md:text-base leading-relaxed">
+   689→                  SREALLABS was founded on a simple belief: every brand deserves content
+   690→                  that looks like a million dollars — even if their budget doesn&apos;t say so.
+   691→                  Salome combines creative direction, 3D visualization, motion design, and
+   692→                  AI-powered production to help brands create premium marketing assets that
+   693→                  drive real business outcomes.
+   694→                </p>
+   695→              </AnimatedSection>
+   696→
+   697→              <AnimatedSection delay={0.3}>
+   698→                <p className="text-matte-silver text-sm md:text-base leading-relaxed">
+   699→                  Rather than focusing on the tools or software, SREALLABS is guided by a
+   700→                  philosophy of craft over convention. Every project is handcrafted to tell
+   701→                  your brand&apos;s unique story with cinematic precision and creative integrity.
+   702→                  The result is visual content that doesn&apos;t just look premium — it makes your
+   703→                  product feel premium, increasing perceived value and capturing attention in
+   704→                  markets where standing out is everything.
+   705→                </p>
+   706→              </AnimatedSection>
+   707→
+   708→              <AnimatedSection delay={0.4}>
+   709→                <button
+   710→                  onClick={() => navigate('about')}
+   711→                  className="inline-flex items-center gap-2 text-electric-blue text-sm font-medium hover:gap-3 transition-all w-fit"
+   712→                >
+   713→                  Learn More <ArrowRight className="w-4 h-4" />
+   714→                </button>
+   715→              </AnimatedSection>
+   716→            </div>
+   717→          </div>
+   718→        </div>
+   719→      </section>
+   720→
+   721→      {/* ===== FAQ ===== */}
+   722→      <section className="py-14 md:py-20 bg-obsidian">
+   723→        <div className="max-w-3xl mx-auto px-6">
+   724→          <SectionHeading title="Frequently Asked Questions" />
+   725→
+   726→          <AnimatedSection className="mt-8" delay={0.15}>
+   727→            <Accordion type="single" collapsible className="w-full">
+   728→              {faqs.map((faq, i) => (
+   729→                <AccordionItem
+   730→                  key={i}
+   731→                  value={`faq-${i}`}
+   732→                  className="border-white/[0.06]"
+   733→                >
+   734→                  <AccordionTrigger className="text-white text-sm md:text-base hover:no-underline hover:text-white/80 py-4">
+   735→                    {faq.q}
+   736→                  </AccordionTrigger>
+   737→                  <AccordionContent className="text-matte-silver text-sm leading-relaxed">
+   738→                    {faq.a}
+   739→                  </AccordionContent>
+   740→                </AccordionItem>
+   741→              ))}
+   742→            </Accordion>
+   743→          </AnimatedSection>
+   744→        </div>
+   745→      </section>
+   746→
+   747→      {/* ===== CTA ===== */}
+   748→      <section className="py-14 md:py-20 bg-surface-secondary relative">
+   749→        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(37,99,235,0.05)_0%,transparent_70%)] pointer-events-none" />
+   750→
+   751→        <div className="relative max-w-2xl mx-auto px-6 text-center">
+   752→          <AnimatedSection>
+   753→            <h2 className="text-3xl md:text-5xl font-bold text-white">
+   754→              Ready to Make Your Product Feel Premium?
+   755→            </h2>
+   756→          </AnimatedSection>
+   757→
+   758→          <AnimatedSection delay={0.15}>
+   759→            <p className="text-matte-silver mt-4 text-sm md:text-base leading-relaxed">
+   760→              Whether you&apos;re launching a new product, preparing for investors or
+   761→              creating your next marketing campaign, SREALLABS can help transform your
+   762→              vision into cinematic visuals.
+   763→            </p>
+   764→          </AnimatedSection>
+   765→
+   766→          <AnimatedSection delay={0.25}>
+   767→            <div className="flex flex-wrap items-center justify-center gap-4 mt-6">
+   768→              <a
+   769→                href={siteConfig.calendlyUrl}
+   770→                target="_blank"
+   771→                rel="noopener noreferrer"
+   772→                className="bg-electric-blue text-white px-6 py-3 rounded-full font-medium text-sm hover:bg-electric-blue/90 transition-colors"
+   773→              >
+   774→                Book a Discovery Call
+   775→              </a>
+   776→              <button
+   777→                onClick={() => navigate('work')}
+   778→                className="border border-white/20 text-white px-6 py-3 rounded-full font-medium text-sm hover:bg-white/5 transition-colors"
+   779→              >
+   780→                View Selected Work
+   781→              </button>
+   782→            </div>
+   783→          </AnimatedSection>
+   784→        </div>
+   785→      </section>
+   786→    </div>
+   787→  )
+   788→}

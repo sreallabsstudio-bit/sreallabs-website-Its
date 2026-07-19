@@ -11,17 +11,17 @@ const philosophy = [
   {
     icon: Lightbulb,
     title: 'Craft Over Convention',
-    description: "We don't follow templates. Every project is handcrafted to tell your brand's unique story with cinematic precision and creative integrity that sets you apart from every competitor in your space.",
+    description: "We don't follow templates. Every project is handcrafted to tell your brand's unique story with cinematic precision. This philosophy of intentional creative direction — where every camera angle, lighting choice, and material treatment serves a strategic purpose — is what separates content that looks premium from content that makes your product feel premium.",
   },
   {
     icon: Zap,
     title: 'Technology as a Canvas',
-    description: "AI and 3D technology aren't just tools — they're our creative medium. We push boundaries to create what's never been seen before, combining artistry with innovation at every step of the process.",
+    description: "AI and 3D technology aren't just tools — they're our creative medium. We combine traditional cinematic craftsmanship with cutting-edge AI and rendering technology to create what's never been seen before. The technology serves the creative vision, not the other way around.",
   },
   {
     icon: Award,
     title: 'Results That Matter',
-    description: "Beautiful content is just the beginning. Everything we create is designed to drive real business outcomes — from increased click-through rates and conversions to brand equity and customer loyalty.",
+    description: "Beautiful content is just the beginning. Everything we create is designed to drive measurable business outcomes — from increased perceived product value and higher click-through rates to improved conversion rates and stronger brand equity. We measure success by your success.",
   },
 ]
 
@@ -30,13 +30,13 @@ const timeline = [
     phase: 'The Vision',
     year: '2024',
     title: 'Where It All Began',
-    description: "SREALLABS was founded with a singular mission: to democratize premium creative content. Salome saw a gap in the market where brands needed cinematic quality content but couldn't afford traditional production costs. The solution was clear — combine world-class creative talent with cutting-edge AI and 3D technology.",
+    description: "SREALLABS was founded with a singular mission: to help brands increase perceived product value through cinematic visual storytelling. Salome saw that the most impactful brand content was locked behind prohibitive production costs, and the solution was clear — combine world-class creative talent with cutting-edge AI and 3D technology to make premium content accessible.",
   },
   {
     phase: 'The Growth',
     year: '2025',
     title: 'Building Momentum',
-    description: "From early experiments with AI video generation to serving clients across 8 industries, SREALLABS rapidly evolved. The studio developed proprietary workflows that blend AI efficiency with cinematic quality, delivering 50+ projects and earning the trust of brands worldwide.",
+    description: "From early experiments with AI video generation to serving clients across 8 industries and 12+ countries, SREALLABS rapidly evolved. The studio developed proprietary workflows that blend AI efficiency with cinematic quality, delivering 50+ projects and earning the trust of brands from innovative startups to established global enterprises.",
   },
   {
     phase: 'The Future',
@@ -94,7 +94,7 @@ export default function AboutPage() {
               About SREALLABS
             </h1>
             <p className="text-matte-silver text-base md:text-lg mt-4 max-w-xl leading-relaxed">
-              A creative technology studio built at the intersection of art, technology, and business results.
+              A premium creative studio that helps brands increase perceived product value through cinematic visual storytelling.
             </p>
           </motion.div>
         </div>
@@ -124,13 +124,13 @@ export default function AboutPage() {
 
               <AnimatedSection delay={0.2}>
                 <p className="text-matte-silver text-sm md:text-base leading-relaxed">
-                  Salome founded SREALLABS with a singular vision: to bridge the gap between cutting-edge technology and world-class creative storytelling. With deep expertise spanning 3D design, AI content generation, and motion graphics, she leads a studio that delivers cinematic quality at unprecedented speed.
+                  Salome founded SREALLABS with a singular vision: to bridge the gap between cutting-edge technology and world-class creative storytelling. She combines creative direction, 3D visualization, motion design, and AI-powered production to help brands create premium marketing assets that drive real business outcomes — from increased perceived value to higher conversion rates.
                 </p>
               </AnimatedSection>
 
               <AnimatedSection delay={0.3}>
                 <p className="text-matte-silver text-sm md:text-base leading-relaxed">
-                  Under her leadership, SREALLABS has delivered 50+ projects across 8 industries, serving clients from innovative startups to established global brands. Her commitment to quality and innovation is the foundation of everything the studio creates.
+                  Under her leadership, SREALLABS has delivered 50+ projects across 8 industries and 12+ countries, serving clients from innovative startups to established global brands. Her philosophy is simple: focus on craft over convention, technology as a creative canvas, and results that matter. Every project carries Salome's personal standard of excellence — cinematic quality, strategic thinking, and a deep understanding of what makes audiences stop scrolling and start engaging.
                 </p>
               </AnimatedSection>
 
@@ -184,19 +184,19 @@ export default function AboutPage() {
 
             <AnimatedSection delay={0.1}>
               <p className="text-matte-silver text-sm md:text-base leading-relaxed mt-8">
-                The story of SREALLABS begins with a simple observation: the most impactful brand content in the world was locked behind prohibitive production costs. Salome saw brands with incredible products struggling to compete visually because premium video content was simply out of reach for most businesses.
+                The story of SREALLABS begins with a simple observation: the most impactful brand content in the world was locked behind prohibitive production costs. Salome saw brands with incredible products struggling to compete visually because premium video content was simply out of reach. The gap wasn't in the quality of the products — it was in the quality of the visual storytelling.
               </p>
             </AnimatedSection>
 
             <AnimatedSection delay={0.2}>
               <p className="text-matte-silver text-sm md:text-base leading-relaxed mt-4">
-                The solution wasn&apos;t to lower quality — it was to reimagine the production process entirely. By combining the artistry of traditional 3D animation and filmmaking with the efficiency of AI-powered tools, SREALLABS created a new category of creative production: cinematic content that&apos;s accessible, scalable, and always premium.
+                The solution wasn&apos;t to lower quality — it was to reimagine the production process entirely. By combining the artistry of traditional 3D animation and cinematic filmmaking with the efficiency of AI-powered tools, SREALLABS created a new category of creative production: visual content that makes products feel premium, accessible at scale, without ever compromising on quality.
               </p>
             </AnimatedSection>
 
             <AnimatedSection delay={0.3}>
               <p className="text-matte-silver text-sm md:text-base leading-relaxed mt-4">
-                Today, that vision has become a reality. SREALLABS serves clients across industries including technology, beauty, luxury, wellness, and SaaS — delivering content that performs on every platform from Amazon to TikTok to Connected TV.
+                Today, SREALLABS serves clients across Consumer Electronics, Industrial Hardware, Luxury, Automotive, SaaS, and Lifestyle — delivering content that performs on every platform from Amazon to TikTok to Connected TV. The mission remains the same: help brands increase perceived product value through cinematic visual storytelling.
               </p>
             </AnimatedSection>
 
@@ -338,10 +338,10 @@ export default function AboutPage() {
         <div className="relative max-w-2xl mx-auto px-6 text-center">
           <AnimatedSection>
             <h2 className="text-2xl md:text-4xl font-bold text-white">
-              Let&apos;s Create Something Extraordinary
+              Ready to Make Your Product Feel Premium?
             </h2>
             <p className="text-matte-silver mt-4 text-sm md:text-base leading-relaxed">
-              Ready to bring your vision to life? We&apos;d love to hear about your project and show you what&apos;s possible.
+              Let&apos;s discuss your project and show you how cinematic visual storytelling can transform your brand&apos;s perceived value.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-4 mt-6">
               <button

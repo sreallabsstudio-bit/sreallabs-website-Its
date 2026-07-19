@@ -228,7 +228,7 @@ export default function ProjectPage() {
   // ─── Related projects (same category, exclude current) ───
   const relatedProjects = useMemo(() => {
     if (!project) return []
-    const cat = project.category as PortfolioCategory
+    const cat = project.buyerCategory as PortfolioCategory
     const same = getProjectsByCategory(cat).filter(
       (p) => p.id !== project.id,
     )

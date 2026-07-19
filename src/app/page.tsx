@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useNavigation, getPageFromPath } from '@/store/navigation'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
@@ -33,7 +33,6 @@ export default function Page() {
       const current = useNavigation.getState()
 
       if (state?.page === 'project' && state?.slug) {
-        // Project page navigation
         useNavigation.setState({
           currentPage: 'project',
           previousPage: current.currentPage,
@@ -43,7 +42,6 @@ export default function Page() {
         return
       }
 
-      // Regular page navigation
       if (state?.page) {
         useNavigation.setState({
           currentPage: state.page,
@@ -54,7 +52,6 @@ export default function Page() {
         return
       }
 
-      // Fallback: resolve from URL
       const pathname = window.location.pathname
       if (pathname.startsWith('/work/')) {
         const slug = pathname.replace('/work/', '').replace(/\/$/, '')
@@ -82,14 +79,19 @@ export default function Page() {
     return () => window.removeEventListener('popstate', handlePopState)
   }, [])
 
-  const pages: Record<string, React.ReactNode> = {
-    home: <HomePage />,
-    work: <WorkPage />,
-    services: <ServicesPage />,
-    about: <AboutPage />,
-    contact: <ContactPage />,
-    project: <ProjectPage />,
-  }
+  // Memoize page elements so they are not re-created on every render.
+  // Only the active page mounts — AnimatePresence handles unmounting.
+  const pages = useMemo<Record<string, React.ReactNode>>(
+    () => ({
+      home: <HomePage />,
+      work: <WorkPage />,
+      services: <ServicesPage />,
+      about: <AboutPage />,
+      contact: <ContactPage />,
+      project: <ProjectPage />,
+    }),
+    [],
+  )
 
   return (
     <div className="min-h-screen flex flex-col">

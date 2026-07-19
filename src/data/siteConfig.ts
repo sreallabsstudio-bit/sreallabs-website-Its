@@ -1,6 +1,6 @@
 export const siteConfig = {
   name: "SREALLABS",
-  tagline: "Reality, Rendered.",
+  tagline: "We Make Products Feel Premium.",
   founder: "Salome",
   email: "sreallabs.studio@gmail.com",
   calendlyUrl: "https://calendly.com/salomeaicreate/sreallabs-discovery-call",
