@@ -1,10 +1,11 @@
 'use client'
 
+import { useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Film, Sparkles, Users, Monitor, Check, ArrowRight, Play } from 'lucide-react'
 import { siteConfig } from '@/data/siteConfig'
-import { portfolio, getFeaturedProjects, getProjectById } from '@/data/portfolio'
 import { useNavigation } from '@/store/navigation'
+import { useProjectsStore } from '@/store/projects'
 import AnimatedSection from '@/components/shared/AnimatedSection'
 import SectionHeading from '@/components/shared/SectionHeading'
 import PortfolioCard from '@/components/shared/PortfolioCard'
@@ -98,7 +99,16 @@ const serviceFaqs = [
 
 export default function ServicesPage() {
   const { navigate, navigateToProject } = useNavigation()
-  const featuredProjects = getFeaturedProjects().slice(0, 6)
+  const projects = useProjectsStore((s) => s.projects)
+  const fetchProjects = useProjectsStore((s) => s.fetchProjects)
+
+  useEffect(() => {
+    fetchProjects()
+  }, [fetchProjects])
+
+  const featuredProjects = projects.filter((p) => p.featured).slice(0, 6)
+  const findSample = (legacyId?: string) =>
+    legacyId ? projects.find((p) => p.legacyId === legacyId) : undefined
 
   return (
     <div className="pt-[72px]">
@@ -142,7 +152,7 @@ export default function ServicesPage() {
       {/* ===== SERVICES DETAIL ===== */}
       <section className="bg-surface-secondary">
         {services.map((service, i) => {
-          const sampleProject = service.serviceProjectId ? getProjectById(service.serviceProjectId) : undefined
+          const sampleProject = service.serviceProjectId ? findSample(service.serviceProjectId) : undefined
           const isReversed = i % 2 === 1
 
           return (
@@ -191,13 +201,25 @@ export default function ServicesPage() {
                         className="relative aspect-video rounded-xl overflow-hidden cursor-pointer group"
                         onClick={() => navigateToProject(sampleProject.slug)}
                       >
-                        <video
-                          src={sampleProject.video}
-                          muted loop playsInline preload="metadata"
-                          className="w-full h-full object-cover"
-                          onMouseEnter={(e) => (e.target as HTMLVideoElement).play().catch(() => {})}
-                          onMouseLeave={(e) => { const v = e.target as HTMLVideoElement; v.pause(); v.currentTime = 0 }}
-                        />
+                        {sampleProject.legacyVideoUrl ? (
+                          <video
+                            src={sampleProject.legacyVideoUrl}
+                            muted loop playsInline preload="metadata"
+                            className="w-full h-full object-cover"
+                            onMouseEnter={(e) => (e.target as HTMLVideoElement).play().catch(() => {})}
+                            onMouseLeave={(e) => { const v = e.target as HTMLVideoElement; v.pause(); v.currentTime = 0 }}
+                          />
+                        ) : sampleProject.thumbnailUrl ? (
+                           
+                          <img
+                            src={sampleProject.thumbnailUrl}
+                            alt={sampleProject.title}
+                            loading="lazy"
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-surface-elevated" />
+                        )}
                         <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors flex items-center justify-center">
                           <div className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                             <Play className="w-5 h-5 text-white ml-0.5" />

@@ -95,18 +95,14 @@ export const pageSeoMap: Record<string, PageSeo> = {
 export function getProjectSeo(project: {
   title: string
   description: string
-  category: string
-  industry: string
   slug: string
-  thumbnail: string
-  video: string
-  year: string
+  thumbnailUrl: string | null
 }): PageSeo {
   return {
     title: `${project.title} | SREALLABS Portfolio`,
     description: project.description,
     path: `/work/${project.slug}`,
-    ogImage: project.thumbnail,
+    ogImage: project.thumbnailUrl ?? ogImage,
     ogType: 'video.other',
   }
 }
@@ -172,18 +168,23 @@ export function buildBreadcrumbSchema(items: { name: string; url: string }[]) {
 export function buildVideoObjectSchema(project: {
   title: string
   description: string
-  video: string
-  thumbnail: string
-  year: string
+  youtubeVideoId: string | null
+  legacyVideoUrl: string | null
+  thumbnailUrl: string | null
+  year: string | null
 }) {
+  const contentUrl =
+    project.youtubeVideoId
+      ? `https://www.youtube.com/watch?v=${project.youtubeVideoId}`
+      : project.legacyVideoUrl ?? ''
   return {
     '@context': 'https://schema.org',
     '@type': 'VideoObject',
     name: project.title,
     description: project.description,
-    contentUrl: project.video,
-    thumbnailUrl: project.thumbnail,
-    uploadDate: `${project.year}-01-01`,
+    contentUrl,
+    thumbnailUrl: project.thumbnailUrl ?? '',
+    uploadDate: `${project.year ?? '2026'}-01-01`,
     publisher: {
       '@type': 'Organization',
       name: 'SREALLABS',
@@ -194,13 +195,13 @@ export function buildVideoObjectSchema(project: {
 
 export function buildImageObjectSchema(project: {
   title: string
-  thumbnail: string
+  thumbnailUrl: string | null
 }) {
   return {
     '@context': 'https://schema.org',
     '@type': 'ImageObject',
     name: project.title,
-    contentUrl: project.thumbnail,
+    contentUrl: project.thumbnailUrl ?? '',
     creator: {
       '@type': 'Organization',
       name: 'SREALLABS',
@@ -212,8 +213,8 @@ export function buildWebPageSchema(project: {
   title: string
   description: string
   slug: string
-  thumbnail: string
-  year: string
+  thumbnailUrl: string | null
+  year: string | null
 }) {
   return {
     '@context': 'https://schema.org',
@@ -221,9 +222,9 @@ export function buildWebPageSchema(project: {
     name: project.title,
     description: project.description,
     url: `${siteUrl}/work/${project.slug}`,
-    image: project.thumbnail,
-    datePublished: `${project.year}-01-01`,
-    dateModified: `${project.year}-01-01`,
+    image: project.thumbnailUrl ?? '',
+    datePublished: `${project.year ?? '2026'}-01-01`,
+    dateModified: `${project.year ?? '2026'}-01-01`,
     isPartOf: {
       '@type': 'WebSite',
       name: 'SREALLABS',

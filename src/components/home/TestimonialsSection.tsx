@@ -90,10 +90,11 @@ export default function TestimonialsSection() {
   const cardsPerView = useCardsPerView()
   const maxIndex = Math.max(0, testimonials.length - cardsPerView)
 
-  // Clamp index when viewport changes
-  useEffect(() => {
-    if (index > maxIndex) setIndex(maxIndex)
-  }, [index, maxIndex])
+  // Clamp index when the viewport changes (render-time state adjustment —
+  // React's recommended pattern, replaces a setState-in-effect).
+  if (index > maxIndex) {
+    setIndex(maxIndex)
+  }
 
   // Auto-advance
   useEffect(() => {

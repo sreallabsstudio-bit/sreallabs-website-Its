@@ -1,10 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { useNavigation } from '@/store/navigation'
-import {
-  getProjectBySlug,
-} from '@/data/portfolio'
+import { useProjectsStore, selectBySlug } from '@/store/projects'
 import {
   siteUrl,
   buildOrganizationSchema,
@@ -24,12 +22,14 @@ import {
  */
 export default function StructuredData() {
   const { currentPage, currentProjectSlug } = useNavigation()
-  const [schemas, setSchemas] = useState<Record<string, object>>({
-    organization: buildOrganizationSchema(),
-    website: buildWebsiteSchema(),
-  })
+  const projects = useProjectsStore((s) => s.projects)
+  const fetchProjects = useProjectsStore((s) => s.fetchProjects)
 
   useEffect(() => {
+    fetchProjects()
+  }, [fetchProjects])
+
+  const schemas = useMemo<Record<string, object>>(() => {
     const next: Record<string, object> = {
       organization: buildOrganizationSchema(),
       website: buildWebsiteSchema(),
@@ -37,9 +37,7 @@ export default function StructuredData() {
 
     // Breadcrumb for current page
     if (currentPage === 'project') {
-      const project = currentProjectSlug
-        ? getProjectBySlug(currentProjectSlug)
-        : undefined
+      const project = selectBySlug(projects, currentProjectSlug)
       if (project) {
         next.breadcrumb = buildBreadcrumbSchema([
           { name: 'Home', url: siteUrl },
@@ -63,8 +61,8 @@ export default function StructuredData() {
       ])
     }
 
-    setSchemas(next)
-  }, [currentPage, currentProjectSlug])
+    return next
+  }, [currentPage, currentProjectSlug, projects])
 
   return (
     <>

@@ -2,10 +2,10 @@
 
 import { useRef, useState, useCallback } from 'react'
 import { motion } from 'framer-motion'
-import type { PortfolioProject } from '@/data/portfolio'
+import type { PublicProject } from '@/lib/types'
 
 interface Props {
-  project: PortfolioProject
+  project: PublicProject
   onClick?: () => void
   index?: number
 }
@@ -14,6 +14,10 @@ export default function PortfolioCard({ project, onClick, index = 0 }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [isHovered, setIsHovered] = useState(false)
   const [isLoaded, setIsLoaded] = useState(false)
+
+  // Hover video preview is only possible for projects with a self-hosted
+  // (legacy) MP4. YouTube-hosted projects show the animated thumbnail style.
+  const hoverVideoUrl = project.legacyVideoUrl
 
   const handleMouseEnter = useCallback(() => {
     setIsHovered(true)
@@ -57,25 +61,32 @@ export default function PortfolioCard({ project, onClick, index = 0 }: Props) {
         aria-label={`View ${project.title}`}
       >
         {/* Thumbnail — always visible as base layer */}
-        <img
-          src={project.thumbnail}
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700"
-          style={{ opacity: isHovered && isLoaded ? 0 : 1 }}
-        />
+        {project.thumbnailUrl ? (
+          <img
+            src={project.thumbnailUrl}
+            alt=""
+            loading="lazy"
+            className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700"
+            style={{ opacity: isHovered && isLoaded ? 0 : 1 }}
+          />
+        ) : (
+          <div className="absolute inset-0 w-full h-full bg-surface-elevated" />
+        )}
 
-        {/* Hover video — overlays thumbnail */}
-        <video
-          ref={videoRef}
-          src={project.video}
-          muted
-          loop
-          playsInline
-          preload="none"
-          onCanPlay={() => setIsLoaded(true)}
-          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700"
-          style={{ opacity: isHovered && isLoaded ? 1 : 0 }}
-        />
+        {/* Hover video — overlays thumbnail (legacy self-hosted videos only) */}
+        {hoverVideoUrl && (
+          <video
+            ref={videoRef}
+            src={hoverVideoUrl}
+            muted
+            loop
+            playsInline
+            preload="none"
+            onCanPlay={() => setIsLoaded(true)}
+            className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700"
+            style={{ opacity: isHovered && isLoaded ? 1 : 0 }}
+          />
+        )}
 
         {/* Bottom gradient overlay — text readable over video */}
         <div
@@ -117,7 +128,7 @@ export default function PortfolioCard({ project, onClick, index = 0 }: Props) {
               color: isHovered ? '#2563EB' : 'rgba(161,161,170,0.8)',
             }}
           >
-            {project.category}
+            {project.service || project.categoryName || ''}
           </p>
         </div>
 

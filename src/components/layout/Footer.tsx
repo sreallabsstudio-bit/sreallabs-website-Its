@@ -1,11 +1,25 @@
 'use client'
 
+import { useEffect } from 'react'
 import { Facebook, Linkedin, Globe, Mail } from 'lucide-react'
 import { siteConfig } from '@/data/siteConfig'
 import { useNavigation, type PageKey } from '@/store/navigation'
+import { useSiteContentStore, contentValue } from '@/store/site-content'
 
 export default function Footer() {
   const { navigate } = useNavigation()
+  const content = useSiteContentStore((s) => s.content)
+  const fetchSiteContent = useSiteContentStore((s) => s.fetchSiteContent)
+
+  useEffect(() => {
+    fetchSiteContent()
+  }, [fetchSiteContent])
+
+  const socials = {
+    facebook: contentValue(content, 'social.facebook') || siteConfig.socialLinks.facebook,
+    linkedin: contentValue(content, 'social.linkedin') || siteConfig.socialLinks.linkedin,
+    contra: contentValue(content, 'social.contra') || siteConfig.socialLinks.contra,
+  }
 
   const handleNav = (href: PageKey) => {
     navigate(href)
@@ -22,7 +36,7 @@ export default function Footer() {
               alt="SREALLABS"
               className="w-11 h-auto object-contain"
             />
-            <p className="text-white font-medium text-sm">{siteConfig.tagline}</p>
+            <p className="text-white font-medium text-sm">{contentValue(content, 'home.hero.heading') || siteConfig.tagline}</p>
             <p className="text-matte-silver text-sm leading-relaxed">
               Premium creative technology studio crafting cinematic visuals that make brands unforgettable.
             </p>
@@ -46,9 +60,9 @@ export default function Footer() {
           <div className="flex flex-col gap-2">
             <p className="text-white text-sm font-medium mb-0.5">Connect</p>
             <div className="flex items-center gap-3">
-              {siteConfig.socialLinks.facebook && (
+              {socials.facebook && (
                 <a
-                  href={siteConfig.socialLinks.facebook}
+                  href={socials.facebook}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-matte-silver hover:text-white hover:bg-white/10 transition-colors"
@@ -57,9 +71,9 @@ export default function Footer() {
                   <Facebook className="w-4 h-4" />
                 </a>
               )}
-              {siteConfig.socialLinks.linkedin && (
+              {socials.linkedin && (
                 <a
-                  href={siteConfig.socialLinks.linkedin}
+                  href={socials.linkedin}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-matte-silver hover:text-white hover:bg-white/10 transition-colors"
@@ -68,9 +82,9 @@ export default function Footer() {
                   <Linkedin className="w-4 h-4" />
                 </a>
               )}
-              {siteConfig.socialLinks.contra && (
+              {socials.contra && (
                 <a
-                  href={siteConfig.socialLinks.contra}
+                  href={socials.contra}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-matte-silver hover:text-white hover:bg-white/10 transition-colors"
@@ -81,11 +95,11 @@ export default function Footer() {
               )}
             </div>
             <a
-              href={`mailto:${siteConfig.email}`}
+              href={`mailto:${contentValue(content, 'contact.email') || siteConfig.email}`}
               className="text-matte-silver text-sm hover:text-white transition-colors inline-flex items-center gap-2 mt-0.5"
             >
               <Mail className="w-3.5 h-3.5" />
-              {siteConfig.email}
+              {contentValue(content, 'contact.email') || siteConfig.email}
             </a>
           </div>
         </div>

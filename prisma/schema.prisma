@@ -1,32 +1,96 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// SREALLABS — Prisma schema (PostgreSQL / Supabase)
+// Production database: Supabase Postgres (set DATABASE_URL in .env / Vercel)
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
-model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
+// ─── Admin authentication ────────────────────────────────────────
+// Passwords stored as bcrypt hashes only. Created via `bun run admin:create`.
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String?
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// ─── Portfolio categories (filter chips on /work) ───────────────
+
+model Category {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  slug      String    @unique
+  sortOrder Int       @default(0)
+  active    Boolean   @default(true)
+  projects  Project[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([active, sortOrder])
+}
+
+// ─── Portfolio projects ──────────────────────────────────────────
+// YouTube is the primary video host (youtubeUrl/youtubeVideoId).
+// legacyVideoUrl preserves pre-existing self-hosted MP4s so current
+// videos keep playing until a YouTube URL is added in the admin.
+
+model Project {
+  id               String   @id @default(cuid())
+  legacyId         String?  @unique
+  title            String
+  slug             String   @unique
+  description      String   @db.Text
+  categoryId       String?
+  category         Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  client           String?
+  industry         String?
+  service          String?
+  youtubeUrl       String?
+  youtubeVideoId   String?
+  googleDriveUrl   String?
+  thumbnailUrl     String?
+  legacyVideoUrl   String?
+  featured         Boolean  @default(false)
+  published        Boolean  @default(false)
+  sortOrder        Int      @default(0)
+  year             String?
+  tags             String[] @default([])
+  fullDescription  String?  @db.Text
+  challenge        String?  @db.Text
+  solution         String?  @db.Text
+  result           String?  @db.Text
+  additionalImages String[] @default([])
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([published, featured, sortOrder])
+  @@index([categoryId])
+  @@index([updatedAt])
+}
+
+// ─── Editable site content (key → value) ────────────────────────
+
+model SiteContent {
+  key       String   @id
+  value     String   @db.Text
   updatedAt DateTime @updatedAt
 }
 
-model Post {
-  id        String   @id @default(cuid())
-  title     String
-  content   String?
-  published Boolean  @default(false)
-  authorId  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+// ─── SEO settings (single row, id = "default") ──────────────────
+
+model SeoSettings {
+  id              String   @id @default("default")
+  siteTitle       String
+  metaDescription String   @db.Text
+  ogImageUrl      String?
+  updatedAt       DateTime @updatedAt
 }

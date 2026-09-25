@@ -11,15 +11,12 @@ import {
   Image as ImageIcon,
   ChevronLeft,
   ChevronRight,
+  ExternalLink,
 } from 'lucide-react'
 import { useNavigation } from '@/store/navigation'
-import {
-  portfolio,
-  getProjectBySlug,
-  getProjectsByCategory,
-  type PortfolioProject,
-  type PortfolioCategory,
-} from '@/data/portfolio'
+import { useProjectsStore, selectBySlug } from '@/store/projects'
+import type { PublicProject } from '@/lib/types'
+import YouTubeEmbed from '@/components/shared/YouTubeEmbed'
 import AnimatedSection from '@/components/shared/AnimatedSection'
 import PortfolioCard from '@/components/shared/PortfolioCard'
 
@@ -93,7 +90,9 @@ function GalleryLightbox({
   onClose: () => void
 }) {
   const [activeIdx, setActiveIdx] = useState(initialIndex)
-  const [loaded, setLoaded] = useState(false)
+  // Track which slide has finished loading (per index, resets on navigation)
+  const [loadedIdx, setLoadedIdx] = useState(-1)
+  const loaded = loadedIdx === activeIdx
 
   const goPrev = useCallback(
     () => setActiveIdx((i) => (i > 0 ? i - 1 : images.length - 1)),
@@ -103,10 +102,6 @@ function GalleryLightbox({
     () => setActiveIdx((i) => (i < images.length - 1 ? i + 1 : 0)),
     [images.length],
   )
-
-  useEffect(() => {
-    setLoaded(false)
-  }, [activeIdx])
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
@@ -178,7 +173,7 @@ function GalleryLightbox({
         <img
           src={images[activeIdx]}
           alt=""
-          onLoad={() => setLoaded(true)}
+          onLoad={() => setLoadedIdx(activeIdx)}
           className="max-w-full max-h-[85vh] object-contain rounded-lg transition-opacity duration-500"
           style={{ opacity: loaded ? 1 : 0 }}
         />
@@ -210,36 +205,42 @@ function GalleryLightbox({
    PROJECT PAGE
    ═══════════════════════════════════════════════════════════════ */
 
-export default function ProjectPage() {
+export default function ProjectPage({ slugOverride }: { slugOverride?: string }) {
   const { currentProjectSlug, navigate, navigateToProject } = useNavigation()
-  const project = currentProjectSlug ? getProjectBySlug(currentProjectSlug) : undefined
+  const projects = useProjectsStore((s) => s.projects)
+  const status = useProjectsStore((s) => s.status)
+  const fetchProjects = useProjectsStore((s) => s.fetchProjects)
 
-  // ─── Prev / Next in the full portfolio array ───
+  useEffect(() => {
+    fetchProjects()
+  }, [fetchProjects])
+
+  const slug = slugOverride ?? currentProjectSlug
+  const project = selectBySlug(projects, slug)
+  const loading = status === 'idle' || status === 'loading'
+
+  // ─── Prev / Next in the admin-ordered project list ───
   const projectIndex = project
-    ? portfolio.findIndex((p) => p.id === project.id)
+    ? projects.findIndex((p) => p.id === project.id)
     : -1
 
-  const prevProject = projectIndex > 0 ? portfolio[projectIndex - 1] : null
+  const prevProject = projectIndex > 0 ? projects[projectIndex - 1] : null
   const nextProject =
-    projectIndex >= 0 && projectIndex < portfolio.length - 1
-      ? portfolio[projectIndex + 1]
+    projectIndex >= 0 && projectIndex < projects.length - 1
+      ? projects[projectIndex + 1]
       : null
 
-  // ─── Related projects (same category, exclude current) ───
+  // ─── Related projects (same category first, exclude current) ───
   const relatedProjects = useMemo(() => {
     if (!project) return []
-    const cat = project.buyerCategory as PortfolioCategory
-    const same = getProjectsByCategory(cat).filter(
-      (p) => p.id !== project.id,
+    const same = project.categoryId
+      ? projects.filter((p) => p.id !== project.id && p.categoryId === project.categoryId)
+      : []
+    const others = projects.filter(
+      (p) => p.id !== project.id && !same.includes(p),
     )
-    const manual = project.relatedProjectIds
-      .map((id) => portfolio.find((p) => p.id === id))
-      .filter((p): p is PortfolioProject => !!p && p.id !== project.id)
-    const combined = [
-      ...new Map([...manual, ...same].map((p) => [p.id, p])).values(),
-    ]
-    return combined.slice(0, 8)
-  }, [project])
+    return [...same, ...others].slice(0, 8)
+  }, [project, projects])
 
   // ─── Sound toggle ───
   const [isMuted, setIsMuted] = useState(true)
@@ -249,13 +250,13 @@ export default function ProjectPage() {
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [lightboxIndex, setLightboxIndex] = useState(0)
 
-  // ─── Preload next project video ───
+  // ─── Preload next project video (legacy self-hosted only) ───
   useEffect(() => {
-    if (!nextProject) return
+    if (!nextProject?.legacyVideoUrl) return
     const link = document.createElement('link')
     link.rel = 'prefetch'
     link.as = 'video'
-    link.href = nextProject.video
+    link.href = nextProject.legacyVideoUrl
     document.head.appendChild(link)
     return () => {
       try { document.head.removeChild(link) } catch {}
@@ -275,6 +276,13 @@ export default function ProjectPage() {
 
   // ─── 404 guard ───
   if (!project) {
+    if (loading) {
+      return (
+        <div className="pt-[72px] min-h-screen flex items-center justify-center bg-obsidian">
+          <p className="text-matte-silver/40 text-sm">Loading…</p>
+        </div>
+      )
+    }
     return (
       <div className="pt-[72px] min-h-screen flex items-center justify-center bg-obsidian">
         <div className="text-center">
@@ -302,15 +310,33 @@ export default function ProjectPage() {
           ═══════════════════════════════════════════════════════ */}
       <section className="relative">
         <div className="relative w-full bg-black" style={{ aspectRatio: '21/9' }}>
-          <video
-            ref={heroVideoRef}
-            src={project.video}
-            autoPlay
-            muted={isMuted}
-            loop
-            playsInline
-            className="w-full h-full object-cover"
-          />
+          {project.youtubeVideoId ? (
+            <YouTubeEmbed
+              videoId={project.youtubeVideoId}
+              title={project.title}
+              posterUrl={project.thumbnailUrl}
+              className="h-full w-full [&>img]:h-full [&>img]:w-full [&>span:last-child]:hidden"
+            />
+          ) : project.legacyVideoUrl ? (
+            <video
+              ref={heroVideoRef}
+              src={project.legacyVideoUrl}
+              autoPlay
+              muted={isMuted}
+              loop
+              playsInline
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            project.thumbnailUrl && (
+               
+              <img
+                src={project.thumbnailUrl}
+                alt={project.title}
+                className="w-full h-full object-cover"
+              />
+            )
+          )}
 
           {/* Top fade to navbar */}
           <div className="absolute top-0 inset-x-0 h-24 bg-gradient-to-b from-obsidian/60 to-transparent pointer-events-none" />
@@ -318,21 +344,23 @@ export default function ProjectPage() {
           {/* Bottom fade to content */}
           <div className="absolute bottom-0 inset-x-0 h-2/5 bg-gradient-to-t from-obsidian via-obsidian/70 to-transparent pointer-events-none" />
 
-          {/* Sound toggle */}
-          <motion.button
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1, duration: 0.5, ease }}
-            onClick={() => setIsMuted(!isMuted)}
-            className="absolute bottom-6 right-6 w-10 h-10 flex items-center justify-center rounded-full bg-black/40 backdrop-blur-md text-white/40 hover:text-white/90 hover:bg-black/60 transition-all duration-300"
-            aria-label={isMuted ? 'Unmute' : 'Mute'}
-          >
-            {isMuted ? (
-              <VolumeX className="w-4 h-4" />
-            ) : (
-              <Volume2 className="w-4 h-4" />
-            )}
-          </motion.button>
+          {/* Sound toggle — legacy video only (YouTube has its own controls) */}
+          {project.legacyVideoUrl && (
+            <motion.button
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1, duration: 0.5, ease }}
+              onClick={() => setIsMuted(!isMuted)}
+              className="absolute bottom-6 right-6 w-10 h-10 flex items-center justify-center rounded-full bg-black/40 backdrop-blur-md text-white/40 hover:text-white/90 hover:bg-black/60 transition-all duration-300"
+              aria-label={isMuted ? 'Unmute' : 'Mute'}
+            >
+              {isMuted ? (
+                <VolumeX className="w-4 h-4" />
+              ) : (
+                <Volume2 className="w-4 h-4" />
+              )}
+            </motion.button>
+          )}
         </div>
 
         {/* Title + Breadcrumb overlay at bottom of hero */}
@@ -352,7 +380,7 @@ export default function ProjectPage() {
             </button>
             <span className="text-white/10 text-[10px]">/</span>
             <span className="text-electric-blue/70 text-[11px] font-light tracking-wide">
-              {project.category}
+              {project.categoryName || project.service || ''}
             </span>
           </div>
 
@@ -369,11 +397,26 @@ export default function ProjectPage() {
         <div className="max-w-5xl mx-auto px-6 md:px-8">
           <div className="flex flex-wrap items-center gap-x-7 gap-y-2.5">
             {project.client && <InfoChip label="Client" value={project.client} />}
-            <InfoChip label="Industry" value={project.industry} />
-            <InfoChip label="Service" value={project.service} />
-            <InfoChip label="Category" value={project.category} />
+            {project.industry && <InfoChip label="Industry" value={project.industry} />}
+            {project.service && <InfoChip label="Service" value={project.service} />}
+            {project.categoryName && <InfoChip label="Category" value={project.categoryName} />}
             {project.year && <InfoChip label="Year" value={project.year} />}
           </div>
+
+          {/* Google Drive — "View Full Sample" (only when a Drive URL exists) */}
+          {project.googleDriveUrl && (
+            <div className="mt-5">
+              <a
+                href={project.googleDriveUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 border border-electric-blue/30 text-electric-blue text-sm font-medium px-6 py-2.5 rounded-full hover:bg-electric-blue/10 hover:border-electric-blue/60 transition-all duration-300"
+              >
+                View Full Sample
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            </div>
+          )}
         </div>
       </AnimatedSection>
 
@@ -539,7 +582,7 @@ export default function ProjectPage() {
               <div className="flex items-end justify-between mb-10">
                 <div>
                   <p className="text-[10px] uppercase tracking-[0.25em] text-white/15 font-medium mb-2">
-                    More in {project.category}
+                    More in {project.categoryName || 'Our Work'}
                   </p>
                   <h2 className="text-2xl md:text-3xl font-semibold text-white tracking-tight">
                     Related Projects
@@ -603,7 +646,7 @@ export default function ProjectPage() {
                       {prevProject.title}
                     </p>
                     <p className="text-white/20 text-[11px] mt-1 truncate">
-                      {prevProject.category}
+                      {prevProject.service || prevProject.categoryName || ''}
                     </p>
                   </div>
                 </button>
@@ -626,7 +669,7 @@ export default function ProjectPage() {
                       {nextProject.title}
                     </p>
                     <p className="text-white/20 text-[11px] mt-1 truncate">
-                      {nextProject.category}
+                      {nextProject.service || nextProject.categoryName || ''}
                     </p>
                   </div>
                   <div className="w-8 h-8 flex items-center justify-center rounded-full border border-white/[0.08] group-hover:border-electric-blue/30 transition-colors duration-300 flex-shrink-0">

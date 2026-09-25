@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { motion, type Variants } from 'framer-motion'
 import {
   ArrowRight,
@@ -22,8 +22,10 @@ import {
   ShoppingBag,
 } from 'lucide-react'
 import { siteConfig } from '@/data/siteConfig'
-import { getFeaturedProjects, getProjectBySlug } from '@/data/portfolio'
 import { useNavigation } from '@/store/navigation'
+import { useProjectsStore } from '@/store/projects'
+import { useSiteContentStore, contentValue } from '@/store/site-content'
+import YouTubeEmbed from '@/components/shared/YouTubeEmbed'
 import AnimatedSection from '@/components/shared/AnimatedSection'
 import SectionHeading from '@/components/shared/SectionHeading'
 import PortfolioCard from '@/components/shared/PortfolioCard'
@@ -201,12 +203,23 @@ const stagger: Variants = {
 export default function HomePage() {
   const { navigate, navigateToProject } = useNavigation()
 
-  const flagshipProject = useMemo(
-    () => getProjectBySlug('shark-ai-ultra-robot-vacuum') || getFeaturedProjects()[0],
-    [],
-  )
+  const projects = useProjectsStore((s) => s.projects)
+  const fetchProjects = useProjectsStore((s) => s.fetchProjects)
+  const content = useSiteContentStore((s) => s.content)
+  const fetchSiteContent = useSiteContentStore((s) => s.fetchSiteContent)
 
-  const featuredProjects = useMemo(() => getFeaturedProjects().slice(0, 4), [])
+  useEffect(() => {
+    fetchProjects()
+    fetchSiteContent()
+  }, [fetchProjects, fetchSiteContent])
+
+  // Featured AND published projects, admin-ordered. First one is the case study.
+  const featuredProjects = useMemo(
+    () => projects.filter((p) => p.featured),
+    [projects],
+  )
+  const flagshipProject = featuredProjects[0]
+  const selectedWork = featuredProjects.slice(1)
 
   return (
     <div>
@@ -242,7 +255,7 @@ export default function HomePage() {
             variants={stagger}
             className="text-4xl md:text-6xl lg:text-7xl font-bold text-white tracking-tight max-w-3xl"
           >
-            We Make Products Feel Premium.
+            {contentValue(content, 'home.hero.heading')}
           </motion.h1>
 
           <motion.p
@@ -252,9 +265,7 @@ export default function HomePage() {
             variants={stagger}
             className="text-matte-silver text-base md:text-lg mt-4 max-w-xl leading-relaxed"
           >
-            We create cinematic product films, 3D animation and AI-powered visual
-            storytelling that help ambitious brands launch better products, increase
-            perceived value and capture attention.
+            {contentValue(content, 'home.hero.description')}
           </motion.p>
 
           <motion.div
@@ -268,10 +279,10 @@ export default function HomePage() {
               onClick={() => navigate('work')}
               className="bg-electric-blue text-white px-6 py-3 rounded-full font-medium text-sm hover:bg-electric-blue/90 transition-colors"
             >
-              View Selected Work
+              {contentValue(content, 'home.hero.cta')}
             </button>
             <a
-              href={siteConfig.calendlyUrl}
+              href={contentValue(content, 'contact.calendlyUrl') || siteConfig.calendlyUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="border border-white/20 text-white px-6 py-3 rounded-full font-medium text-sm hover:bg-white/5 transition-colors"
@@ -292,26 +303,46 @@ export default function HomePage() {
               </p>
             </AnimatedSection>
 
-            {/* Video */}
+            {/* Video — YouTube projects embed lazily; legacy MP4s keep hover-play */}
             <AnimatedSection className="mt-6" delay={0.1}>
-              <div
-                className="relative aspect-video rounded-2xl overflow-hidden cursor-pointer group"
-                onClick={() => navigateToProject(flagshipProject.slug)}
-              >
-                <video
-                  src={flagshipProject.video}
-                  muted
-                  loop
-                  playsInline
-                  preload="metadata"
-                  className="w-full h-full object-cover"
-                  onMouseEnter={(e) => (e.target as HTMLVideoElement).play().catch(() => {})}
-                  onMouseLeave={(e) => {
-                    const v = e.target as HTMLVideoElement
-                    v.pause()
-                    v.currentTime = 0
-                  }}
-                />
+              {flagshipProject.youtubeVideoId ? (
+                <div className="rounded-2xl overflow-hidden">
+                  <YouTubeEmbed
+                    videoId={flagshipProject.youtubeVideoId}
+                    title={flagshipProject.title}
+                    posterUrl={flagshipProject.thumbnailUrl}
+                  />
+                </div>
+              ) : (
+                <div
+                  className="relative aspect-video rounded-2xl overflow-hidden cursor-pointer group"
+                  onClick={() => navigateToProject(flagshipProject.slug)}
+                >
+                  {flagshipProject.legacyVideoUrl ? (
+                    <video
+                      src={flagshipProject.legacyVideoUrl}
+                      muted
+                      loop
+                      playsInline
+                      preload="metadata"
+                      className="w-full h-full object-cover"
+                      onMouseEnter={(e) => (e.target as HTMLVideoElement).play().catch(() => {})}
+                      onMouseLeave={(e) => {
+                        const v = e.target as HTMLVideoElement
+                        v.pause()
+                        v.currentTime = 0
+                      }}
+                    />
+                  ) : (
+                    flagshipProject.thumbnailUrl && (
+                       
+                      <img
+                        src={flagshipProject.thumbnailUrl}
+                        alt={flagshipProject.title}
+                        className="w-full h-full object-cover"
+                      />
+                    )
+                  )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
                 {/* Play button */}
                 <div className="absolute inset-0 flex items-center justify-center">
@@ -319,7 +350,8 @@ export default function HomePage() {
                     <Play className="w-6 h-6 md:w-7 md:h-7 text-white ml-1" />
                   </div>
                 </div>
-              </div>
+                </div>
+              )}
             </AnimatedSection>
 
             {/* Case Study Content */}
@@ -387,7 +419,7 @@ export default function HomePage() {
           />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-8">
-            {featuredProjects.map((p, i) => (
+            {selectedWork.map((p, i) => (
               <PortfolioCard
                 key={p.id}
                 project={p}
@@ -770,7 +802,7 @@ export default function HomePage() {
           <AnimatedSection delay={0.25}>
             <div className="flex flex-wrap items-center justify-center gap-4 mt-6">
               <a
-                href={siteConfig.calendlyUrl}
+                href={contentValue(content, 'contact.calendlyUrl') || siteConfig.calendlyUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-electric-blue text-white px-6 py-3 rounded-full font-medium text-sm hover:bg-electric-blue/90 transition-colors"
@@ -781,7 +813,7 @@ export default function HomePage() {
                 onClick={() => navigate('work')}
                 className="border border-white/20 text-white px-6 py-3 rounded-full font-medium text-sm hover:bg-white/5 transition-colors"
               >
-                View Selected Work
+                {contentValue(content, 'home.hero.cta')}
               </button>
             </div>
           </AnimatedSection>

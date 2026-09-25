@@ -2,7 +2,8 @@
 
 import { useEffect } from 'react'
 import { useNavigation } from '@/store/navigation'
-import { getProjectBySlug } from '@/data/portfolio'
+import { useProjectsStore, selectBySlug } from '@/store/projects'
+import { useSiteContentStore } from '@/store/site-content'
 import {
   siteUrl,
   pageSeoMap,
@@ -15,6 +16,15 @@ import {
  */
 export function useDocumentHead() {
   const { currentPage, currentProjectSlug } = useNavigation()
+  const projects = useProjectsStore((s) => s.projects)
+  const fetchProjects = useProjectsStore((s) => s.fetchProjects)
+  const content = useSiteContentStore((s) => s.content)
+  const fetchSiteContent = useSiteContentStore((s) => s.fetchSiteContent)
+
+  useEffect(() => {
+    fetchProjects()
+    fetchSiteContent()
+  }, [fetchProjects, fetchSiteContent])
 
   useEffect(() => {
     let title = pageSeoMap.home.title
@@ -23,8 +33,14 @@ export function useDocumentHead() {
     let ogImg = ogImage
     let ogType = 'website'
 
+    // Admin-editable SEO overrides for the homepage
+    if (currentPage === 'home') {
+      if (content['seo.siteTitle']) title = content['seo.siteTitle']
+      if (content['seo.metaDescription']) description = content['seo.metaDescription']
+    }
+
     if (currentPage === 'project' && currentProjectSlug) {
-      const project = getProjectBySlug(currentProjectSlug)
+      const project = selectBySlug(projects, currentProjectSlug)
       if (project) {
         const seo = getProjectSeo(project)
         title = seo.title
@@ -59,7 +75,7 @@ export function useDocumentHead() {
     setMeta('twitter:description', description, 'name')
     setMeta('twitter:image', ogImg, 'name')
     setMeta('twitter:site', '@sreallabs', 'name')
-  }, [currentPage, currentProjectSlug])
+  }, [currentPage, currentProjectSlug, projects, content])
 }
 
 function setMeta(name: string, content: string, attr = 'name') {

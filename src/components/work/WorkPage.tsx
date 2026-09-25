@@ -1,39 +1,35 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
-import {
-  portfolio,
-  portfolioCategories,
-  getFeaturedProjects,
-  getProjectsByCategory,
-  getProjectById,
-  type PortfolioCategory,
-  type PortfolioProject,
-} from '@/data/portfolio'
 import { useNavigation } from '@/store/navigation'
+import {
+  useProjectsStore,
+  selectByCategory,
+} from '@/store/projects'
+import type { PublicProject } from '@/lib/types'
 import AnimatedSection from '@/components/shared/AnimatedSection'
 import SectionHeading from '@/components/shared/SectionHeading'
 import PortfolioCard from '@/components/shared/PortfolioCard'
 
-const creativeCollections = [
+const creativeCollections: { title: string; description: string; category: string; icon: string }[] = [
   {
     title: 'Product Cinema',
     description: 'Our finest 3D product animations',
-    category: 'Consumer Electronics' as PortfolioCategory,
+    category: 'Consumer Electronics',
     icon: '🎬',
   },
   {
     title: 'Industrial Precision',
     description: 'Enterprise and hardware visualization',
-    category: 'Industrial Hardware' as PortfolioCategory,
+    category: 'Industrial',
     icon: '⚙️',
   },
   {
     title: 'Digital Luxury',
     description: 'Premium content for luxury brands',
-    category: 'Luxury Products' as PortfolioCategory,
+    category: 'Luxury',
     icon: '💎',
   },
 ]
@@ -43,7 +39,7 @@ const creativeCollections = [
  * Uses the same video-dominant design language as PortfolioCard
  * but with a 21:9 ultra-wide aspect ratio.
  */
-function FeaturedLeadCard({ project, onClick }: { project: PortfolioProject; onClick: () => void }) {
+function FeaturedLeadCard({ project, onClick }: { project: PublicProject; onClick: () => void }) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [isHovered, setIsHovered] = useState(false)
   const [isLoaded, setIsLoaded] = useState(false)
@@ -72,24 +68,31 @@ function FeaturedLeadCard({ project, onClick }: { project: PortfolioProject; onC
       aria-label={`View ${project.title}`}
     >
       {/* Thumbnail base */}
-      <img
-        src={project.thumbnail}
-        alt=""
-        className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700"
-        style={{ opacity: isHovered && isLoaded ? 0 : 1 }}
-      />
-      {/* Hover video */}
-      <video
-        ref={videoRef}
-        src={project.video}
-        muted
-        loop
-        playsInline
-        preload="none"
-        onCanPlay={() => setIsLoaded(true)}
-        className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700"
-        style={{ opacity: isHovered && isLoaded ? 1 : 0 }}
-      />
+      {project.thumbnailUrl ? (
+        <img
+          src={project.thumbnailUrl}
+          alt=""
+          loading="lazy"
+          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700"
+          style={{ opacity: isHovered && isLoaded ? 0 : 1 }}
+        />
+      ) : (
+        <div className="absolute inset-0 w-full h-full bg-surface-elevated" />
+      )}
+      {/* Hover video (legacy self-hosted videos only) */}
+      {project.legacyVideoUrl && (
+        <video
+          ref={videoRef}
+          src={project.legacyVideoUrl}
+          muted
+          loop
+          playsInline
+          preload="none"
+          onCanPlay={() => setIsLoaded(true)}
+          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700"
+          style={{ opacity: isHovered && isLoaded ? 1 : 0 }}
+        />
+      )}
       {/* Gradient */}
       <div className="absolute bottom-0 inset-x-0 h-2/3 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none" />
       {/* Electric blue glow */}
@@ -118,7 +121,7 @@ function FeaturedLeadCard({ project, onClick }: { project: PortfolioProject; onC
             color: isHovered ? '#2563EB' : 'rgba(161,161,170,0.7)',
           }}
         >
-          {project.category} · {project.industry}
+          {project.service || project.categoryName || ''} · {project.industry}
         </p>
       </div>
       {/* View Project badge — top-right */}
@@ -139,16 +142,24 @@ function FeaturedLeadCard({ project, onClick }: { project: PortfolioProject; onC
 
 export default function WorkPage() {
   const { navigate, navigateToProject } = useNavigation()
-  const [activeCategory, setActiveCategory] = useState<PortfolioCategory>('All')
+  const projects = useProjectsStore((s) => s.projects)
+  const categories = useProjectsStore((s) => s.categories)
+  const status = useProjectsStore((s) => s.status)
+  const fetchProjects = useProjectsStore((s) => s.fetchProjects)
+  const [activeCategory, setActiveCategory] = useState<string>('All')
   const filterRef = useRef<HTMLDivElement>(null)
 
-  const workFeaturedLead = getProjectById('featured-new')
-  const featuredProjectsRest = getFeaturedProjects()
-    .filter((p) => p.id !== 'featured-new')
-    .slice(0, 2)
-  const filteredProjects = getProjectsByCategory(activeCategory)
+  useEffect(() => {
+    fetchProjects()
+  }, [fetchProjects])
 
-  const scrollToFilters = (cat: PortfolioCategory) => {
+  const featured = projects.filter((p) => p.featured)
+  const workFeaturedLead = featured[0]
+  const featuredProjectsRest = featured.slice(1, 3)
+  const filteredProjects = selectByCategory(projects, activeCategory)
+  const loading = status === 'idle' || status === 'loading'
+
+  const scrollToFilters = (cat: string) => {
     setActiveCategory(cat)
     filterRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
@@ -215,10 +226,10 @@ export default function WorkPage() {
             subtitle="Explore our work by the industries and markets we serve"
           />
 
-          {/* Filter Pills */}
+          {/* Filter Pills — categories come from the database (admin-managed) */}
           <AnimatedSection className="mt-6" delay={0.1}>
             <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
-              {portfolioCategories.map((cat) => (
+              {['All', ...categories.map((c) => c.name)].map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setActiveCategory(cat)}
@@ -236,7 +247,13 @@ export default function WorkPage() {
 
           {/* Project Count */}
           <p className="text-matte-silver text-sm mt-4">
-            Showing <span className="text-white font-medium">{filteredProjects.length}</span> projects
+            {loading ? (
+              'Loading projects…'
+            ) : (
+              <>
+                Showing <span className="text-white font-medium">{filteredProjects.length}</span> projects
+              </>
+            )}
           </p>
 
           {/* Project Grid */}
@@ -251,7 +268,7 @@ export default function WorkPage() {
             ))}
           </div>
 
-          {filteredProjects.length === 0 && (
+          {filteredProjects.length === 0 && !loading && (
             <div className="text-center py-20">
               <p className="text-matte-silver text-sm">No projects found in this category.</p>
             </div>
@@ -269,7 +286,7 @@ export default function WorkPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5 mt-8">
             {creativeCollections.map((collection, i) => {
-              const projects = getProjectsByCategory(collection.category).slice(0, 3)
+              const collectionProjects = selectByCategory(projects, collection.category).slice(0, 3)
               return (
                 <AnimatedSection key={collection.title} delay={i * 0.1}>
                   <div
@@ -278,13 +295,18 @@ export default function WorkPage() {
                   >
                     {/* Preview thumbnails */}
                     <div className="grid grid-cols-3 gap-0.5 h-28 overflow-hidden">
-                      {projects.map((p) => (
+                      {collectionProjects.map((p) => (
                         <div key={p.id} className="relative">
-                          <video
-                            src={p.video}
-                            muted loop playsInline preload="none"
-                            className="w-full h-full object-cover"
-                          />
+                          {p.thumbnailUrl ? (
+                            <img
+                              src={p.thumbnailUrl}
+                              alt=""
+                              loading="lazy"
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-surface-elevated" />
+                          )}
                         </div>
                       ))}
                     </div>
@@ -297,7 +319,7 @@ export default function WorkPage() {
                         <ArrowRight className="w-4 h-4 text-matte-silver group-hover:text-electric-blue transition-colors flex-shrink-0" />
                       </div>
                       <p className="text-electric-blue text-xs font-medium mt-3">
-                        {getProjectsByCategory(collection.category).length} projects →
+                        {selectByCategory(projects, collection.category).length} projects →
                       </p>
                     </div>
                   </div>

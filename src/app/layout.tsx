@@ -4,10 +4,9 @@ import "./globals.css";
 import { Toaster } from "sonner";
 import {
   siteUrl,
-  ogImage,
   faviconUrl,
-  logoUrl,
 } from "@/config/seo";
+import { getSeoSettings } from "@/lib/site-content-server";
 
 const manrope = Manrope({
   variable: "--font-manrope",
@@ -30,78 +29,95 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
-  title: {
-    default:
-      "SREALLABS | Cinematic 3D Product Animation & AI Commercial Studio",
-    template: "%s | SREALLABS",
-  },
-  description:
-    "SREALLABS creates cinematic 3D product animation, AI commercials, AI UGC videos and SaaS product films that help ambitious brands launch, grow and convert.",
-  keywords: [
-    "SREALLABS",
-    "3D Product Animation",
-    "AI Commercials",
-    "AI UGC",
-    "SaaS Videos",
-    "Creative Technology",
-    "Product Video",
-    "CGI",
-    "Motion Design",
-    "Creative Storytelling",
-    "Cinematic Animation",
-  ],
-  authors: [{ name: "Salome", url: `${siteUrl}/about` }],
-  creator: "SREALLABS",
-  publisher: "SREALLABS",
-  icons: {
-    icon: faviconUrl,
-    shortcut: faviconUrl,
-    apple: faviconUrl,
-  },
-  openGraph: {
-    title: "SREALLABS | Reality, Rendered.",
-    description:
-      "Premium cinematic 3D product animation, AI commercials and visual storytelling for brands that want to stand out.",
-    type: "website",
-    siteName: "SREALLABS",
-    locale: "en_US",
-    url: siteUrl,
-    images: [
-      {
-        url: ogImage,
-        width: 1200,
-        height: 630,
-        alt: "SREALLABS — Reality, Rendered.",
-      },
+export async function generateMetadata(): Promise<Metadata> {
+  // Admin-editable SEO (falls back to the current site values if the DB is
+  // unavailable or not yet configured).
+  let seo: { siteTitle: string; metaDescription: string; ogImageUrl: string };
+  try {
+    seo = await getSeoSettings();
+  } catch {
+    seo = {
+      siteTitle:
+        "SREALLABS | Cinematic 3D Product Animation & AI Commercial Studio",
+      metaDescription:
+        "SREALLABS creates cinematic 3D product animation, AI commercials, AI UGC videos and SaaS product films that help ambitious brands launch, grow and convert.",
+      ogImageUrl: "",
+    };
+  }
+  const og = seo.ogImageUrl;
+
+  return {
+    metadataBase: new URL(siteUrl),
+    title: {
+      default: seo.siteTitle,
+      template: "%s | SREALLABS",
+    },
+    description: seo.metaDescription,
+    keywords: [
+      "SREALLABS",
+      "3D Product Animation",
+      "3D Product Visualization",
+      "Photorealistic Product Rendering",
+      "Cinematic Product Films",
+      "3D Product Explainer Animation",
+      "Industrial Product Visualization",
+      "Product Video",
+      "CGI",
+      "Motion Design",
+      "Creative Storytelling",
+      "Cinematic Animation",
     ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "SREALLABS | Reality, Rendered.",
-    description:
-      "Premium cinematic 3D product animation, AI commercials and visual storytelling for brands that want to stand out.",
-    images: [ogImage],
-    creator: "@sreallabs",
-    site: "@sreallabs",
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
+    authors: [{ name: "Salome", url: `${siteUrl}/about` }],
+    creator: "SREALLABS",
+    publisher: "SREALLABS",
+    icons: {
+      icon: faviconUrl,
+      shortcut: faviconUrl,
+      apple: faviconUrl,
+    },
+    openGraph: {
+      title: seo.siteTitle,
+      description: seo.metaDescription,
+      type: "website",
+      siteName: "SREALLABS",
+      locale: "en_US",
+      url: siteUrl,
+      images: og
+        ? [
+            {
+              url: og,
+              width: 1200,
+              height: 630,
+              alt: "SREALLABS — Reality, Rendered.",
+            },
+          ]
+        : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: seo.siteTitle,
+      description: seo.metaDescription,
+      images: og ? [og] : undefined,
+      creator: "@sreallabs",
+      site: "@sreallabs",
+    },
+    robots: {
       index: true,
       follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
     },
-  },
-  alternates: {
-    canonical: siteUrl,
-  },
-  verification: {},
-};
+    alternates: {
+      canonical: siteUrl,
+    },
+    verification: {},
+  };
+}
 
 export default function RootLayout({
   children,

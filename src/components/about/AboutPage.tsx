@@ -1,8 +1,10 @@
 'use client'
 
+import { useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Heart, Zap, Globe, ArrowRight, Award, Shield, Lightbulb, Facebook, Linkedin, ExternalLink } from 'lucide-react'
 import { siteConfig } from '@/data/siteConfig'
+import { useSiteContentStore, contentValue } from '@/store/site-content'
 import { useNavigation } from '@/store/navigation'
 import AnimatedSection from '@/components/shared/AnimatedSection'
 import SectionHeading from '@/components/shared/SectionHeading'
@@ -78,6 +80,17 @@ const stats = [
 
 export default function AboutPage() {
   const { navigate } = useNavigation()
+  const content = useSiteContentStore((s) => s.content)
+  const fetchSiteContent = useSiteContentStore((s) => s.fetchSiteContent)
+
+  useEffect(() => {
+    fetchSiteContent()
+  }, [fetchSiteContent])
+
+  const socials = {
+    facebook: contentValue(content, 'social.facebook') || siteConfig.socialLinks.facebook,
+    linkedin: contentValue(content, 'social.linkedin') || siteConfig.socialLinks.linkedin,
+  }
 
   return (
     <div className="pt-[72px]">
@@ -89,12 +102,12 @@ export default function AboutPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: [0.25, 0.4, 0.25, 1] }}
           >
-            <p className="text-electric-blue text-xs uppercase tracking-[0.2em] font-medium">Our Story</p>
+            <p className="text-electric-blue text-xs uppercase tracking-[0.2em] font-medium">{contentValue(content, 'about.heading')}</p>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight mt-4">
               About SREALLABS
             </h1>
             <p className="text-matte-silver text-base md:text-lg mt-4 max-w-xl leading-relaxed">
-              A premium creative studio that helps brands increase perceived product value through cinematic visual storytelling.
+              {contentValue(content, 'about.description')}
             </p>
           </motion.div>
         </div>
@@ -136,9 +149,9 @@ export default function AboutPage() {
 
               <AnimatedSection delay={0.4}>
                 <div className="flex items-center gap-3 mt-2">
-                  {siteConfig.socialLinks.facebook && (
+                  {socials.facebook && (
                     <a
-                      href={siteConfig.socialLinks.facebook}
+                      href={socials.facebook}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-matte-silver hover:text-white hover:bg-white/10 transition-colors"
@@ -147,9 +160,9 @@ export default function AboutPage() {
                       <Facebook className="w-4 h-4" />
                     </a>
                   )}
-                  {siteConfig.socialLinks.linkedin && (
+                  {socials.linkedin && (
                     <a
-                      href={siteConfig.socialLinks.linkedin}
+                      href={socials.linkedin}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-matte-silver hover:text-white hover:bg-white/10 transition-colors"

@@ -2,11 +2,13 @@
 
 import { motion } from 'framer-motion'
 import { useForm } from 'react-hook-form'
+import { useEffect } from 'react'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Mail, Calendar, Clock, ExternalLink, Facebook, Linkedin, ArrowRight } from 'lucide-react'
 import { toast } from 'sonner'
 import { siteConfig } from '@/data/siteConfig'
+import { useSiteContentStore, contentValue } from '@/store/site-content'
 import AnimatedSection from '@/components/shared/AnimatedSection'
 import SectionHeading from '@/components/shared/SectionHeading'
 import { Input } from '@/components/ui/input'
@@ -32,13 +34,20 @@ const projectTypes = [
   'Other',
 ]
 
-const socialCards = [
-  { name: 'Facebook', icon: Facebook, url: siteConfig.socialLinks.facebook },
-  { name: 'LinkedIn', icon: Linkedin, url: siteConfig.socialLinks.linkedin },
-  { name: 'Contra', icon: ExternalLink, url: siteConfig.socialLinks.contra },
-]
-
 export default function ContactPage() {
+  const content = useSiteContentStore((s) => s.content)
+  const fetchSiteContent = useSiteContentStore((s) => s.fetchSiteContent)
+
+  useEffect(() => {
+    fetchSiteContent()
+  }, [fetchSiteContent])
+
+  const socialCards = [
+    { name: 'Facebook', icon: Facebook, url: contentValue(content, 'social.facebook') || siteConfig.socialLinks.facebook },
+    { name: 'LinkedIn', icon: Linkedin, url: contentValue(content, 'social.linkedin') || siteConfig.socialLinks.linkedin },
+    { name: 'Contra', icon: ExternalLink, url: contentValue(content, 'social.contra') || siteConfig.socialLinks.contra },
+  ]
+
   const {
     register,
     handleSubmit,
@@ -110,10 +119,10 @@ export default function ContactPage() {
                   <div>
                     <p className="text-white text-sm font-medium">Email</p>
                     <a
-                      href={`mailto:${siteConfig.email}`}
+                      href={`mailto:${contentValue(content, 'contact.email') || siteConfig.email}`}
                       className="text-matte-silver text-sm hover:text-electric-blue transition-colors"
                     >
-                      {siteConfig.email}
+                      {contentValue(content, 'contact.email') || siteConfig.email}
                     </a>
                   </div>
                 </div>
@@ -126,7 +135,7 @@ export default function ContactPage() {
                   <div>
                     <p className="text-white text-sm font-medium">Schedule a Call</p>
                     <a
-                      href={siteConfig.calendlyUrl}
+                      href={contentValue(content, 'contact.calendlyUrl') || siteConfig.calendlyUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-electric-blue text-sm hover:underline"

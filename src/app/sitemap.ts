@@ -1,8 +1,12 @@
 import { MetadataRoute } from 'next'
-import { portfolio } from '@/data/portfolio'
+import { getPublicProjects } from '@/lib/portfolio-server'
 import { siteUrl } from '@/config/seo'
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
+/** Sitemap generated from the database — only PUBLISHED projects are listed. */
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPages: MetadataRoute.Sitemap = [
     {
       url: siteUrl,
@@ -36,9 +40,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ]
 
-  const projectPages: MetadataRoute.Sitemap = portfolio.map((p) => ({
+  const projects = await getPublicProjects()
+  const projectPages: MetadataRoute.Sitemap = projects.map((p) => ({
     url: `${siteUrl}/work/${p.slug}`,
-    lastModified: new Date(`${p.year}-01-01`),
+    lastModified: new Date(p.updatedAt),
     changeFrequency: 'monthly' as const,
     priority: 0.7,
   }))
