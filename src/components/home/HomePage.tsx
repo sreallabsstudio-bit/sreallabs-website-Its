@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
-import { motion } from 'framer-motion'
+import { motion, type Variants } from 'framer-motion'
 import {
   ArrowRight,
   Play,
@@ -185,7 +185,7 @@ const faqs = [
   },
 ]
 
-const stagger = {
+const stagger: Variants = {
   hidden: { opacity: 0 },
   visible: (i: number) => ({
     opacity: 1,

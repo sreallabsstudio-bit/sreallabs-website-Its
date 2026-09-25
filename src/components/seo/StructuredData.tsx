@@ -50,7 +50,7 @@ export default function StructuredData() {
         next.imageObject = buildImageObjectSchema(project)
         next.webPage = buildWebPageSchema(project)
       }
-    } else if (currentPage !== 'home' && currentPage !== 'project') {
+    } else if (currentPage !== 'home') {
       const labels: Record<string, string> = {
         work: 'Work',
         services: 'Services',
