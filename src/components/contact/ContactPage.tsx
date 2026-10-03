@@ -5,33 +5,39 @@ import { useForm } from 'react-hook-form'
 import { useEffect } from 'react'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Mail, Calendar, Clock, ExternalLink, Facebook, Linkedin, ArrowRight } from 'lucide-react'
+import { Mail, Calendar, Clock } from 'lucide-react'
 import { toast } from 'sonner'
 import { siteConfig } from '@/data/siteConfig'
 import { useSiteContentStore, contentValue } from '@/store/site-content'
 import AnimatedSection from '@/components/shared/AnimatedSection'
-import SectionHeading from '@/components/shared/SectionHeading'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 const contactSchema = z.object({
   name: z.string().min(2, 'Name is required'),
   email: z.string().email('Please enter a valid email'),
   company: z.string().optional(),
   projectType: z.string().min(1, 'Please select a project type'),
-  message: z.string().min(10, 'Please provide more detail (at least 10 characters)'),
+  message: z.string().min(10, 'Please provide more detail'),
 })
 
 type ContactForm = z.infer<typeof contactSchema>
 
 const projectTypes = [
-  '3D Product Animation',
-  'AI Commercials',
-  'AI UGC',
-  'SaaS Product Video',
-  'Other',
+  '3D Animation',
+  '3D Visualization',
+  'Product Rendering & CGI',
+  'Industrial Visualization',
+  '3D Motion Design',
+  'Other 3D Project',
 ]
 
 export default function ContactPage() {
@@ -41,12 +47,6 @@ export default function ContactPage() {
   useEffect(() => {
     fetchSiteContent()
   }, [fetchSiteContent])
-
-  const socialCards = [
-    { name: 'Facebook', icon: Facebook, url: contentValue(content, 'social.facebook') || siteConfig.socialLinks.facebook },
-    { name: 'LinkedIn', icon: Linkedin, url: contentValue(content, 'social.linkedin') || siteConfig.socialLinks.linkedin },
-    { name: 'Contra', icon: ExternalLink, url: contentValue(content, 'social.contra') || siteConfig.socialLinks.contra },
-  ]
 
   const {
     register,
@@ -65,265 +65,308 @@ export default function ContactPage() {
     },
   })
 
+  const email =
+    contentValue(content, 'contact.email') || siteConfig.email
+
+  const calendly =
+    contentValue(content, 'contact.calendlyUrl') ||
+    siteConfig.calendlyUrl
+
   const onSubmit = async (data: ContactForm) => {
-    // Simulate submission delay
     await new Promise((resolve) => setTimeout(resolve, 800))
+
     console.log('Contact form submitted:', data)
-    toast.success("Thank you! We'll be in touch within 24 hours.")
+
+    toast.success("Thank you. We'll be in touch soon.")
     reset()
   }
 
   return (
-    <main>
-      {/* ===== HERO ===== */}
-      <section className="bg-obsidian py-16 md:py-24">
-        <div className="max-w-7xl mx-auto px-6">
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
+    <main className="bg-obsidian">
+
+      {/* HERO */}
+      <section className="bg-obsidian py-20 md:py-28">
+        <div className="max-w-6xl mx-auto px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 25 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: [0.25, 0.4, 0.25, 1] }}
-            className="text-4xl md:text-5xl lg:text-6xl font-bold text-white"
+            transition={{ duration: 0.6 }}
           >
-            Let&apos;s Talk
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1, ease: [0.25, 0.4, 0.25, 1] }}
-            className="text-matte-silver mt-2 text-lg md:text-xl"
-          >
-            Ready to bring your vision to life? We&apos;d love to hear from you.
-          </motion.p>
+            <p className="text-electric-blue text-sm font-medium uppercase tracking-[0.2em]">
+              Contact SREALLABS
+            </p>
+
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mt-4 max-w-4xl">
+              Let&apos;s create something worth seeing.
+            </h1>
+
+            <p className="text-matte-silver text-lg md:text-xl mt-6 max-w-2xl leading-relaxed">
+              Have a 3D project in mind? Tell us what you are building,
+              and let&apos;s talk about how we can bring it to life.
+            </p>
+          </motion.div>
         </div>
       </section>
 
-      {/* ===== CONTACT INFO + FORM ===== */}
-      <section className="bg-obsidian py-14 md:py-20">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid md:grid-cols-2 gap-8 md:gap-14">
-            {/* Left: Contact details */}
+      {/* CONTACT + FORM */}
+      <section className="bg-obsidian pb-20 md:pb-28">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="grid lg:grid-cols-[0.8fr_1.2fr] gap-12 lg:gap-20">
+
+            {/* CONTACT INFO */}
             <AnimatedSection>
-              <div className="space-y-5">
+              <div className="space-y-8">
+
                 <div>
-                  <h2 className="text-xl font-semibold text-white">Get in Touch</h2>
-                  <p className="text-matte-silver text-sm mt-1">
-                    Have a project in mind? Reach out and we&apos;ll get back to you quickly.
+                  <p className="text-white text-xl font-semibold">
+                    Start a project
+                  </p>
+
+                  <p className="text-matte-silver text-sm mt-2 leading-relaxed max-w-md">
+                    Share your idea, product, concept, or visual challenge.
+                    We&apos;ll review the details and get back to you.
                   </p>
                 </div>
 
-                {/* Email */}
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-electric-blue/10 flex items-center justify-center shrink-0">
+                <div className="flex items-start gap-4">
+                  <div className="w-11 h-11 rounded-xl bg-electric-blue/10 flex items-center justify-center shrink-0">
                     <Mail className="w-5 h-5 text-electric-blue" />
                   </div>
+
                   <div>
-                    <p className="text-white text-sm font-medium">Email</p>
+                    <p className="text-white text-sm font-medium">
+                      Email
+                    </p>
+
                     <a
-                      href={`mailto:${contentValue(content, 'contact.email') || siteConfig.email}`}
-                      className="text-matte-silver text-sm hover:text-electric-blue transition-colors"
+                      href={`mailto:${email}`}
+                      className="text-matte-silver text-sm mt-1 inline-block hover:text-electric-blue transition-colors"
                     >
-                      {contentValue(content, 'contact.email') || siteConfig.email}
+                      {email}
                     </a>
                   </div>
                 </div>
 
-                {/* Calendly */}
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-electric-blue/10 flex items-center justify-center shrink-0">
+                <div className="flex items-start gap-4">
+                  <div className="w-11 h-11 rounded-xl bg-electric-blue/10 flex items-center justify-center shrink-0">
                     <Calendar className="w-5 h-5 text-electric-blue" />
                   </div>
+
                   <div>
-                    <p className="text-white text-sm font-medium">Schedule a Call</p>
+                    <p className="text-white text-sm font-medium">
+                      Book a Call
+                    </p>
+
                     <a
-                      href={contentValue(content, 'contact.calendlyUrl') || siteConfig.calendlyUrl}
+                      href={calendly}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-electric-blue text-sm hover:underline"
+                      className="text-electric-blue text-sm mt-1 inline-block hover:underline"
                     >
-                      Book on Calendly →
+                      Schedule a conversation →
                     </a>
                   </div>
                 </div>
 
-                {/* Response time */}
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-electric-blue/10 flex items-center justify-center shrink-0">
+                <div className="flex items-start gap-4">
+                  <div className="w-11 h-11 rounded-xl bg-electric-blue/10 flex items-center justify-center shrink-0">
                     <Clock className="w-5 h-5 text-electric-blue" />
                   </div>
+
                   <div>
-                    <p className="text-white text-sm font-medium">Response Time</p>
-                    <p className="text-matte-silver text-sm">We typically respond within 24 hours</p>
+                    <p className="text-white text-sm font-medium">
+                      Response Time
+                    </p>
+
+                    <p className="text-matte-silver text-sm mt-1">
+                      We typically reply within 24 hours.
+                    </p>
                   </div>
                 </div>
+
               </div>
             </AnimatedSection>
 
-            {/* Right: Contact Form */}
+            {/* FORM */}
             <AnimatedSection delay={0.1}>
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                {/* Name */}
+              <form
+                onSubmit={handleSubmit(onSubmit)}
+                className="bg-surface-card border border-white/[0.06] rounded-2xl p-6 md:p-8 space-y-5"
+              >
+
+                {/* NAME */}
                 <div className="space-y-1.5">
-                  <Label htmlFor="name" className="text-white text-sm">
-                    Name <span className="text-destructive">*</span>
+                  <Label
+                    htmlFor="name"
+                    className="text-white text-sm"
+                  >
+                    Name
                   </Label>
+
                   <Input
                     id="name"
                     placeholder="Your name"
                     {...register('name')}
-                    className="bg-surface-card border-white/[0.06] text-white placeholder:text-matte-silver/50 h-11 focus-visible:border-electric-blue focus-visible:ring-electric-blue/20"
+                    className="bg-obsidian border-white/[0.08] text-white placeholder:text-matte-silver/50 h-12"
                   />
+
                   {errors.name && (
-                    <p className="text-destructive text-xs">{errors.name.message}</p>
+                    <p className="text-destructive text-xs">
+                      {errors.name.message}
+                    </p>
                   )}
                 </div>
 
-                {/* Email */}
+                {/* EMAIL */}
                 <div className="space-y-1.5">
-                  <Label htmlFor="email" className="text-white text-sm">
-                    Email <span className="text-destructive">*</span>
+                  <Label
+                    htmlFor="email"
+                    className="text-white text-sm"
+                  >
+                    Email
                   </Label>
+
                   <Input
                     id="email"
                     type="email"
                     placeholder="you@company.com"
                     {...register('email')}
-                    className="bg-surface-card border-white/[0.06] text-white placeholder:text-matte-silver/50 h-11 focus-visible:border-electric-blue focus-visible:ring-electric-blue/20"
+                    className="bg-obsidian border-white/[0.08] text-white placeholder:text-matte-silver/50 h-12"
                   />
+
                   {errors.email && (
-                    <p className="text-destructive text-xs">{errors.email.message}</p>
+                    <p className="text-destructive text-xs">
+                      {errors.email.message}
+                    </p>
                   )}
                 </div>
 
-                {/* Company (optional) */}
+                {/* COMPANY */}
                 <div className="space-y-1.5">
-                  <Label htmlFor="company" className="text-white text-sm">
-                    Company <span className="text-matte-silver/50">(optional)</span>
+                  <Label
+                    htmlFor="company"
+                    className="text-white text-sm"
+                  >
+                    Company
+                    <span className="text-matte-silver/50 ml-1">
+                      (optional)
+                    </span>
                   </Label>
+
                   <Input
                     id="company"
-                    placeholder="Your company"
+                    placeholder="Company name"
                     {...register('company')}
-                    className="bg-surface-card border-white/[0.06] text-white placeholder:text-matte-silver/50 h-11 focus-visible:border-electric-blue focus-visible:ring-electric-blue/20"
+                    className="bg-obsidian border-white/[0.08] text-white placeholder:text-matte-silver/50 h-12"
                   />
                 </div>
 
-                {/* Project Type */}
+                {/* PROJECT TYPE */}
                 <div className="space-y-1.5">
-                  <Label htmlFor="projectType" className="text-white text-sm">
-                    Project Type <span className="text-destructive">*</span>
+                  <Label
+                    htmlFor="projectType"
+                    className="text-white text-sm"
+                  >
+                    Project Type
                   </Label>
-                  <Select onValueChange={(val) => setValue('projectType', val, { shouldValidate: true })}>
+
+                  <Select
+                    onValueChange={(value) =>
+                      setValue('projectType', value, {
+                        shouldValidate: true,
+                      })
+                    }
+                  >
                     <SelectTrigger
-                      className="w-full bg-surface-card border-white/[0.06] text-white h-11 focus:ring-electric-blue/20 data-[placeholder]:text-matte-silver/50"
+                      className="w-full bg-obsidian border-white/[0.08] text-white h-12"
                     >
                       <SelectValue placeholder="Select a project type" />
                     </SelectTrigger>
-                    <SelectContent className="bg-surface-elevated border-white/[0.06]">
+
+                    <SelectContent className="bg-surface-elevated border-white/[0.08]">
                       {projectTypes.map((type) => (
-                        <SelectItem key={type} value={type} className="text-white focus:bg-electric-blue/10 focus:text-white">
+                        <SelectItem
+                          key={type}
+                          value={type}
+                          className="text-white"
+                        >
                           {type}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
+
                   {errors.projectType && (
-                    <p className="text-destructive text-xs">{errors.projectType.message}</p>
+                    <p className="text-destructive text-xs">
+                      {errors.projectType.message}
+                    </p>
                   )}
                 </div>
 
-                {/* Message */}
+                {/* MESSAGE */}
                 <div className="space-y-1.5">
-                  <Label htmlFor="message" className="text-white text-sm">
-                    Message <span className="text-destructive">*</span>
+                  <Label
+                    htmlFor="message"
+                    className="text-white text-sm"
+                  >
+                    Tell us about your project
                   </Label>
+
                   <Textarea
                     id="message"
-                    placeholder="Tell us about your project..."
-                    rows={5}
+                    placeholder="What are you looking to create?"
+                    rows={6}
                     {...register('message')}
-                    className="bg-surface-card border-white/[0.06] text-white placeholder:text-matte-silver/50 min-h-[120px] focus-visible:border-electric-blue focus-visible:ring-electric-blue/20"
+                    className="bg-obsidian border-white/[0.08] text-white placeholder:text-matte-silver/50 min-h-[150px]"
                   />
+
                   {errors.message && (
-                    <p className="text-destructive text-xs">{errors.message.message}</p>
+                    <p className="text-destructive text-xs">
+                      {errors.message.message}
+                    </p>
                   )}
                 </div>
 
-                {/* Submit */}
+                {/* SUBMIT */}
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full bg-electric-blue text-white py-3 rounded-full font-medium hover:bg-electric-blue/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-electric-blue text-white py-3.5 rounded-full font-medium hover:bg-electric-blue/90 transition-colors disabled:opacity-50"
                 >
-                  {isSubmitting ? 'Sending...' : 'Send Message'}
+                  {isSubmitting ? 'Sending...' : 'Send Project Inquiry'}
                 </button>
+
               </form>
             </AnimatedSection>
+
           </div>
         </div>
       </section>
 
-      {/* ===== CALENDLY SECTION ===== */}
-      <section className="bg-surface-secondary py-14 md:py-20">
-        <div className="max-w-7xl mx-auto px-6">
-          <AnimatedSection className="text-center max-w-2xl mx-auto">
-            <h2 className="text-2xl md:text-3xl font-semibold text-white">
-              Schedule a Discovery Call
-            </h2>
-            <p className="text-matte-silver mt-2 text-base">
-              Book a free 30-minute call to discuss your project.
-            </p>
-            <a
-              href={siteConfig.calendlyUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-6 inline-flex items-center gap-2 bg-electric-blue text-white px-6 py-3 rounded-full text-sm font-medium hover:bg-electric-blue/90 transition-colors"
-            >
-              Book Discovery Call
-            </a>
-            <p className="text-matte-silver/60 text-sm mt-4">
-              Free consultation · No commitment · 30 minutes
-            </p>
-          </AnimatedSection>
-        </div>
-      </section>
+      {/* FINAL CTA */}
+      <section className="bg-surface-secondary py-16 md:py-20">
+        <div className="max-w-4xl mx-auto px-6 text-center">
 
-      {/* ===== SOCIAL LINKS ===== */}
-      <section className="bg-obsidian py-14 md:py-20">
-        <div className="max-w-7xl mx-auto px-6">
-          <SectionHeading title="Connect With Us" className="text-center" />
-          <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
-            {socialCards.map((card, i) => (
-              <AnimatedSection key={card.name} delay={0.1 + i * 0.1}>
-                <a
-                  href={card.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block bg-surface-card rounded-xl p-5 border border-white/[0.06] text-center hover:border-electric-blue/30 transition-all group"
-                >
-                  <card.icon className="w-6 h-6 text-matte-silver mx-auto group-hover:text-electric-blue transition-colors" />
-                  <p className="text-white font-medium mt-3">{card.name}</p>
-                  <p className="text-matte-silver text-sm mt-0.5">Follow</p>
-                </a>
-              </AnimatedSection>
-            ))}
-          </div>
-        </div>
-      </section>
+          <h2 className="text-3xl md:text-4xl font-semibold text-white">
+            Prefer a conversation?
+          </h2>
 
-      {/* ===== FOOTER CTA ===== */}
-      <section className="bg-surface-secondary py-10 md:py-14">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-          <p className="text-matte-silver text-sm">
-            Prefer email?{' '}
-            <a
-              href={`mailto:${siteConfig.email}`}
-              className="text-electric-blue hover:underline inline-flex items-center gap-1"
-            >
-              {siteConfig.email} <ArrowRight className="w-3 h-3" />
-            </a>
+          <p className="text-matte-silver mt-3 max-w-xl mx-auto">
+            Book a call and let&apos;s talk through your project directly.
           </p>
+
+          <a
+            href={calendly}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-7 inline-flex items-center bg-electric-blue text-white px-7 py-3.5 rounded-full text-sm font-medium hover:bg-electric-blue/90 transition-colors"
+          >
+            Book a Call
+          </a>
+
         </div>
       </section>
+
     </main>
   )
 }

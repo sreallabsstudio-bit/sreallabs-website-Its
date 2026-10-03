@@ -1,375 +1,325 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { Film, Sparkles, Users, Monitor, Check, ArrowRight, Play } from 'lucide-react'
+import {
+  ArrowRight,
+  Box,
+  Camera,
+  Film,
+  Layers,
+  Monitor,
+  PenTool,
+} from 'lucide-react'
 import { siteConfig } from '@/data/siteConfig'
 import { useNavigation } from '@/store/navigation'
 import { useProjectsStore } from '@/store/projects'
 import AnimatedSection from '@/components/shared/AnimatedSection'
 import SectionHeading from '@/components/shared/SectionHeading'
 import PortfolioCard from '@/components/shared/PortfolioCard'
-import {
-  Accordion,
-  AccordionItem,
-  AccordionTrigger,
-  AccordionContent,
-} from '@/components/ui/accordion'
 
 const services = [
   {
     icon: Film,
-    title: '3D Product Animation',
-    description: 'Create launch-ready product films that increase perceived value and capture attention.',
-    longDescription: 'Our 3D product animation service produces cinematic product films that do more than showcase features — they elevate how customers perceive your product. Using photorealistic rendering, dramatic lighting, and dynamic camera work, we create content that increases perceived value, improves click-through rates on product listings, and gives your brand a premium visual presence across every platform.',
-    features: ['Photorealistic Rendering', 'Dynamic Camera Work', 'Material Accuracy', 'Amazon & E-commerce Ready', 'Fast Turnaround', 'Multiple Format Delivery'],
-    serviceProjectId: '3d-5',
+    title: '3D Animation',
+    description: 'Cinematic motion that brings products, concepts, and ideas to life.',
   },
   {
-    icon: Sparkles,
-    title: 'AI Commercials',
-    description: 'Produce campaign-ready advertising content faster without sacrificing quality.',
-    longDescription: 'Our AI commercial service leverages cutting-edge generative AI combined with professional post-production to produce broadcast-quality advertising content at a fraction of traditional production costs. We create content that looks and feels authentic, optimized for performance across social media, Connected TV, and digital advertising platforms. The result is scalable ad creative that maintains the premium quality your brand demands.',
-    features: ['AI-Generated Visuals', 'Brand Consistency', 'Rapid Production', 'Multi-Platform Optimization', 'Scalable Content', 'Founder & Testimonial Style'],
-    serviceProjectId: 'beauty-2',
+    icon: Camera,
+    title: '3D Visualization',
+    description: 'Photorealistic visuals with detailed materials, lighting, and composition.',
   },
   {
-    icon: Users,
-    title: 'AI UGC',
-    description: 'Generate authentic creator-style advertising content at scale.',
-    longDescription: 'AI UGC is revolutionizing how brands approach social media marketing. Our service generates creator-style product demonstrations, unboxing videos, and lifestyle content that feels authentic and relatable. Each piece is designed to perform on social platforms, with natural presentation styles and genuine-feeling engagement patterns that resonate with modern audiences — all without the logistics, costs, and unpredictability of real creator partnerships.',
-    features: ['Creator-Style Content', 'Infinite Variations', 'Cost Effective', 'Rapid Turnaround', 'Platform Native', 'A/B Test Ready'],
-    serviceProjectId: 'ugc-3',
+    icon: Box,
+    title: 'CGI & Product Rendering',
+    description: 'High-quality CGI for products, concepts, launches, and campaigns.',
+  },
+  {
+    icon: Layers,
+    title: '3D Motion Design',
+    description: 'Dynamic 3D graphics for brands, presentations, and visual experiences.',
   },
   {
     icon: Monitor,
-    title: 'SaaS Product Videos',
-    description: 'Turn complex software into engaging visual stories that improve product understanding.',
-    longDescription: 'SaaS products present unique storytelling challenges — abstract features, invisible value, and technical complexity. Our SaaS video service transforms these challenges into compelling visual narratives. We create product demos, founder stories, workflow visualizations, and brand films that make software products tangible, understandable, and desirable — driving sign-ups, reducing churn, and improving product-led growth.',
-    features: ['Feature Demos', 'UI Animations', 'Explainer Videos', 'Founder Stories', 'Workflow Visualizations', 'Conversion Optimized'],
-    serviceProjectId: 'saas-2',
+    title: 'Industrial Visualization',
+    description: 'Clear and detailed visuals for machines, systems, and technical products.',
+  },
+  {
+    icon: PenTool,
+    title: '3D Creative Work',
+    description: 'Characters, environments, concepts, and other custom 3D experiences.',
   },
 ]
 
 const processSteps = [
   {
     num: '01',
-    title: 'Discovery',
-    description: 'Understand the product, audience, and brand positioning. We study your market, competitors, and goals to build a strong creative foundation.',
+    title: 'Discover',
+    description: 'Understand the idea, product, and visual goal.',
   },
   {
     num: '02',
-    title: 'Strategy',
-    description: 'Develop visual direction and creative strategy. Every decision — from camera angles to lighting mood — is designed to increase perceived product value.',
+    title: 'Create',
+    description: 'Model, design, animate, light, and refine the work.',
   },
   {
     num: '03',
-    title: 'Production',
-    description: 'Craft cinematic content using industry-leading 3D rendering and AI technology. Every frame is polished to premium standards.',
-  },
-  {
-    num: '04',
-    title: 'Delivery',
-    description: 'Launch-ready marketing assets optimized for every platform. From Amazon to social campaigns to investor presentations.',
+    title: 'Deliver',
+    description: 'Polished 3D visuals ready for your next use.',
   },
 ]
 
-const serviceFaqs = [
+const faqs = [
   {
-    q: "What's included in a 3D product animation?",
-    a: "A standard 3D product animation includes concept development, 3D modeling, texturing, lighting, animation, rendering, and post-production. You receive a final video optimized for your target platforms — Amazon, social media, website, or advertising networks. Each project includes one round of revisions.",
+    question: 'What can you create in 3D?',
+    answer:
+      'We create product animation, visualization, CGI, motion design, industrial visuals, characters, environments, and other custom 3D work.',
   },
   {
-    q: 'How do AI commercials work?',
-    a: "We use advanced AI video generation technology combined with professional post-production to create commercial-quality content. The process involves creative direction, AI generation, human curation and refinement, color grading, sound design, and final optimization. The result is content that feels authentic and premium.",
+    question: 'Can you work from existing 3D files?',
+    answer:
+      'Yes. Existing models, CAD files, references, sketches, or product images can be used as a starting point.',
   },
   {
-    q: 'What platforms do you optimize for?',
-    a: "We optimize content for all major platforms including Amazon product pages, Instagram, TikTok, YouTube, LinkedIn, Facebook, Connected TV, and websites. Each platform has specific requirements for aspect ratio, duration, and visual style — we handle all of that for you.",
+    question: 'Can I request revisions?',
+    answer:
+      'Yes. Revisions are part of the creative process and are discussed based on the project scope.',
   },
   {
-    q: 'Can I request revisions?',
-    a: "Absolutely. Every project includes at least one round of revisions to ensure the final product meets your expectations. We believe in collaborative creative processes and work closely with you throughout production to minimize the need for major revisions.",
-  },
-  {
-    q: 'Do you offer package deals?',
-    a: "Yes, we offer flexible packages for clients who need multiple pieces of content. Whether it's a series of product videos, a content bundle for a product launch, or an ongoing content partnership, we can create a custom package that delivers maximum value for your investment.",
+    question: 'How do I start a project?',
+    answer:
+      'Send us your idea, references, or project brief. We will review it and discuss the right 3D approach.',
   },
 ]
 
 export default function ServicesPage() {
   const { navigate, navigateToProject } = useNavigation()
-  const projects = useProjectsStore((s) => s.projects)
-  const fetchProjects = useProjectsStore((s) => s.fetchProjects)
+
+  const projects = useProjectsStore((state) => state.projects)
+  const fetchProjects = useProjectsStore((state) => state.fetchProjects)
 
   useEffect(() => {
     fetchProjects()
   }, [fetchProjects])
 
-  const featuredProjects = projects.filter((p) => p.featured).slice(0, 6)
-  const findSample = (legacyId?: string) =>
-    legacyId ? projects.find((p) => p.legacyId === legacyId) : undefined
+  const selectedWork = useMemo(() => {
+    const featured = projects.filter((project) => project.featured)
+
+    if (featured.length > 0) {
+      return featured.slice(0, 6)
+    }
+
+    return projects.slice(0, 6)
+  }, [projects])
 
   return (
-    <div className="pt-[72px]">
-      {/* ===== HERO ===== */}
-      <section className="py-16 md:py-24 bg-obsidian">
-        <div className="max-w-7xl mx-auto px-6">
+    <div className="pt-[72px] bg-obsidian">
+      {/* HERO */}
+      <section className="bg-obsidian py-16 md:py-24">
+        <div className="mx-auto max-w-7xl px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: [0.25, 0.4, 0.25, 1] }}
+            transition={{ duration: 0.6 }}
           >
-            <p className="text-electric-blue text-xs uppercase tracking-[0.2em] font-medium">What We Do</p>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight mt-4">
-              Services
+            <p className="text-xs font-medium uppercase tracking-[0.22em] text-electric-blue">
+              What We Do
+            </p>
+
+            <h1 className="mt-4 max-w-3xl text-4xl font-bold tracking-tight text-white md:text-6xl">
+              3D, made to move.
             </h1>
-            <p className="text-matte-silver text-base md:text-lg mt-4 max-w-xl leading-relaxed">
-              Premium visual content designed to increase perceived product value and drive measurable business outcomes.
+
+            <p className="mt-5 max-w-2xl text-base leading-relaxed text-matte-silver md:text-lg">
+              Animation, visualization, CGI, and motion design for products,
+              brands, concepts, and ideas.
             </p>
           </motion.div>
         </div>
       </section>
 
-      {/* ===== INTRODUCTION ===== */}
-      <section className="py-12 md:py-16 bg-obsidian">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="max-w-3xl">
-            <AnimatedSection>
-              <p className="text-matte-silver text-base md:text-lg leading-relaxed">
-                At SREALLABS, we don&apos;t just create videos — we engineer visual experiences that make products feel premium. Our approach combines the artistry of traditional filmmaking with the precision of modern technology, delivering content that performs as beautifully as it looks.
-              </p>
-            </AnimatedSection>
-            <AnimatedSection delay={0.15}>
-              <p className="text-matte-silver text-base md:text-lg leading-relaxed mt-2">
-                Whether you need a cinematic product reveal that stops scrollers in their tracks, an AI-powered commercial that scales across markets, or a SaaS explainer that turns complex features into compelling stories — we have the expertise, tools, and creative vision to deliver.
-              </p>
-            </AnimatedSection>
+      {/* SERVICES */}
+      <section className="bg-surface-secondary py-16 md:py-24">
+        <div className="mx-auto max-w-7xl px-6">
+          <AnimatedSection>
+            <SectionHeading
+              title="Capabilities"
+              subtitle="A focused 3D practice built around strong visual craft."
+            />
+          </AnimatedSection>
+
+          <div className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {services.map((service, index) => {
+              const Icon = service.icon
+
+              return (
+                <AnimatedSection
+                  key={service.title}
+                  delay={index * 0.06}
+                >
+                  <div className="group h-full rounded-2xl border border-white/[0.06] bg-surface-card p-6 transition-all duration-300 hover:border-electric-blue/30">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-electric-blue/10">
+                      <Icon className="h-5 w-5 text-electric-blue" />
+                    </div>
+
+                    <h2 className="mt-6 text-xl font-medium text-white">
+                      {service.title}
+                    </h2>
+
+                    <p className="mt-3 text-sm leading-relaxed text-matte-silver">
+                      {service.description}
+                    </p>
+
+                    <button
+                      onClick={() => navigate('contact')}
+                      className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-electric-blue transition-all hover:gap-3"
+                    >
+                      Start a Project
+                      <ArrowRight className="h-4 w-4" />
+                    </button>
+                  </div>
+                </AnimatedSection>
+              )
+            })}
           </div>
         </div>
       </section>
 
-      {/* ===== SERVICES DETAIL ===== */}
-      <section className="bg-surface-secondary">
-        {services.map((service, i) => {
-          const sampleProject = service.serviceProjectId ? findSample(service.serviceProjectId) : undefined
-          const isReversed = i % 2 === 1
+      {/* SELECTED WORK */}
+      <section className="bg-obsidian py-16 md:py-24">
+        <div className="mx-auto max-w-7xl px-6">
+          <AnimatedSection>
+            <SectionHeading
+              title="Selected Work"
+              subtitle="A few recent 3D projects from the studio."
+            />
+          </AnimatedSection>
 
-          return (
-            <div key={service.title} className={i > 0 ? 'border-t border-white/[0.04]' : ''}>
-              <div className="py-12 md:py-16">
-                <div className={`max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 items-center ${isReversed ? 'md:direction-rtl' : ''}`}>
-                  {/* Text Content */}
-                  <AnimatedSection className={isReversed ? 'md:order-2' : ''}>
-                    <div className={`flex items-center gap-3 mb-4 ${isReversed ? 'md:flex-row-reverse' : ''}`}>
-                      <div className="w-fit rounded-lg bg-electric-blue/10 p-2.5">
-                        <service.icon className="w-5 h-5 text-electric-blue" />
-                      </div>
-                      <span className="text-electric-blue text-xs uppercase tracking-[0.15em] font-medium">
-                        Service {String(i + 1).padStart(2, '0')}
-                      </span>
-                    </div>
-
-                    <h2 className="text-2xl md:text-3xl font-semibold text-white">
-                      {service.title}
-                    </h2>
-                    <p className="text-matte-silver text-sm leading-relaxed mt-4">
-                      {service.longDescription}
-                    </p>
-
-                    <ul className="mt-4 space-y-2">
-                      {service.features.map((feature) => (
-                        <li key={feature} className="flex items-start gap-2.5">
-                          <Check className="w-4 h-4 text-acid-lime mt-0.5 flex-shrink-0" />
-                          <span className="text-matte-silver text-sm">{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-
-                    <button
-                      onClick={() => navigate('contact')}
-                      className="mt-5 inline-flex items-center gap-2 text-electric-blue text-sm font-medium hover:gap-3 transition-all"
-                    >
-                      Discuss This Service <ArrowRight className="w-4 h-4" />
-                    </button>
-                  </AnimatedSection>
-
-                  {/* Video Preview */}
-                  <AnimatedSection delay={0.15} className={isReversed ? 'md:order-1' : ''}>
-                    {sampleProject ? (
-                      <div
-                        className="relative aspect-video rounded-xl overflow-hidden cursor-pointer group"
-                        onClick={() => navigateToProject(sampleProject.slug)}
-                      >
-                        {sampleProject.legacyVideoUrl ? (
-                          <video
-                            src={sampleProject.legacyVideoUrl}
-                            muted loop playsInline preload="metadata"
-                            className="w-full h-full object-cover"
-                            onMouseEnter={(e) => (e.target as HTMLVideoElement).play().catch(() => {})}
-                            onMouseLeave={(e) => { const v = e.target as HTMLVideoElement; v.pause(); v.currentTime = 0 }}
-                          />
-                        ) : sampleProject.thumbnailUrl ? (
-                           
-                          <img
-                            src={sampleProject.thumbnailUrl}
-                            alt={sampleProject.title}
-                            loading="lazy"
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-surface-elevated" />
-                        )}
-                        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-                          <div className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Play className="w-5 h-5 text-white ml-0.5" />
-                          </div>
-                        </div>
-                        <div className="absolute bottom-3 left-3 right-3">
-                          <p className="text-white text-xs font-medium">{sampleProject.title}</p>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="aspect-video rounded-xl bg-surface-card border border-white/[0.06] flex items-center justify-center">
-                        <service.icon className="w-12 h-12 text-electric-blue/30" />
-                      </div>
-                    )}
-                  </AnimatedSection>
-                </div>
-              </div>
+          {selectedWork.length > 0 ? (
+            <div className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {selectedWork.map((project, index) => (
+                <AnimatedSection
+                  key={project.id}
+                  delay={index * 0.05}
+                >
+                  <PortfolioCard
+                    project={project}
+                    onClick={() => navigateToProject(project.slug)}
+                    index={index}
+                  />
+                </AnimatedSection>
+              ))}
             </div>
-          )
-        })}
-      </section>
+          ) : (
+            <div className="mt-10 rounded-2xl border border-white/[0.06] bg-surface-card p-10 text-center">
+              <p className="text-sm text-matte-silver">
+                Projects will appear here once they are published.
+              </p>
+            </div>
+          )}
 
-      {/* ===== FEATURED WORK ===== */}
-      <section className="py-14 md:py-20 bg-obsidian">
-        <div className="max-w-7xl mx-auto px-6">
-          <SectionHeading
-            title="Our Latest Work"
-            subtitle="Recent projects across all service categories"
-          />
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5 mt-8">
-            {featuredProjects.map((p) => (
-              <AnimatedSection key={p.id}>
-                <PortfolioCard project={p} onClick={() => navigateToProject(p.slug)} />
-              </AnimatedSection>
-            ))}
-          </div>
-
-          <AnimatedSection className="mt-6">
+          <AnimatedSection className="mt-8">
             <button
               onClick={() => navigate('work')}
-              className="inline-flex items-center gap-2 text-electric-blue text-sm font-medium hover:gap-3 transition-all"
+              className="inline-flex items-center gap-2 text-sm font-medium text-electric-blue transition-all hover:gap-3"
             >
-              View All Projects <ArrowRight className="w-4 h-4" />
+              View All Work
+              <ArrowRight className="h-4 w-4" />
             </button>
           </AnimatedSection>
         </div>
       </section>
 
-      {/* ===== PROCESS ===== */}
-      <section className="py-14 md:py-20 bg-surface-secondary">
-        <div className="max-w-7xl mx-auto px-6">
-          <SectionHeading
-            title="Our Process"
-            subtitle="A proven approach that delivers results every time"
-          />
+      {/* PROCESS */}
+      <section className="bg-surface-secondary py-16 md:py-24">
+        <div className="mx-auto max-w-6xl px-6">
+          <AnimatedSection>
+            <SectionHeading
+              title="How We Work"
+              subtitle="Simple process. Strong visuals."
+            />
+          </AnimatedSection>
 
-          <div className="mt-8">
-            {/* Desktop Timeline */}
-            <div className="hidden md:grid grid-cols-4 gap-4 md:gap-6">
-              {processSteps.map((step, i) => (
-                <AnimatedSection key={step.num} delay={i * 0.1}>
-                  <div className="relative">
-                    {i < processSteps.length - 1 && (
-                      <div className="absolute top-6 left-[calc(100%)] w-[calc(100%-3rem)] h-px bg-white/10 hidden lg:block" style={{ left: '60%', width: '80%' }} />
-                    )}
-                    <span className="text-electric-blue font-mono text-2xl font-bold">{step.num}</span>
-                    <h3 className="text-white font-medium mt-3 text-base">{step.title}</h3>
-                    <p className="text-matte-silver text-sm mt-2 leading-relaxed">{step.description}</p>
-                  </div>
-                </AnimatedSection>
-              ))}
-            </div>
+          <div className="mt-10 grid grid-cols-1 gap-8 md:grid-cols-3">
+            {processSteps.map((step, index) => (
+              <AnimatedSection
+                key={step.num}
+                delay={index * 0.08}
+              >
+                <div className="border-t border-white/[0.08] pt-5">
+                  <span className="font-mono text-sm font-bold text-electric-blue">
+                    {step.num}
+                  </span>
 
-            {/* Mobile Timeline */}
-            <div className="md:hidden space-y-8">
-              {processSteps.map((step, i) => (
-                <AnimatedSection key={step.num} delay={i * 0.1}>
-                  <div className="flex gap-4">
-                    <div className="flex flex-col items-center">
-                      <span className="text-electric-blue font-mono text-lg font-bold">{step.num}</span>
-                      {i < processSteps.length - 1 && (
-                        <div className="w-px h-full bg-white/10 mt-2" />
-                      )}
-                    </div>
-                    <div className="pb-6">
-                      <h3 className="text-white font-medium text-base">{step.title}</h3>
-                      <p className="text-matte-silver text-sm mt-2 leading-relaxed">{step.description}</p>
-                    </div>
-                  </div>
-                </AnimatedSection>
-              ))}
-            </div>
+                  <h3 className="mt-3 text-lg font-medium text-white">
+                    {step.title}
+                  </h3>
+
+                  <p className="mt-2 text-sm leading-relaxed text-matte-silver">
+                    {step.description}
+                  </p>
+                </div>
+              </AnimatedSection>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ===== FAQ ===== */}
-      <section className="py-14 md:py-20 bg-obsidian">
-        <div className="max-w-3xl mx-auto px-6">
-          <SectionHeading title="Service FAQ" />
-
-          <AnimatedSection className="mt-8" delay={0.15}>
-            <Accordion type="single" collapsible className="w-full">
-              {serviceFaqs.map((faq, i) => (
-                <AccordionItem
-                  key={i}
-                  value={`faq-${i}`}
-                  className="border-white/[0.06]"
-                >
-                  <AccordionTrigger className="text-white text-sm md:text-base hover:no-underline hover:text-white/80 py-4">
-                    {faq.q}
-                  </AccordionTrigger>
-                  <AccordionContent className="text-matte-silver text-sm leading-relaxed">
-                    {faq.a}
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
+      {/* FAQ */}
+      <section className="bg-obsidian py-16 md:py-24">
+        <div className="mx-auto max-w-3xl px-6">
+          <AnimatedSection>
+            <SectionHeading title="FAQ" />
           </AnimatedSection>
+
+          <div className="mt-8 divide-y divide-white/[0.08] border-y border-white/[0.08]">
+            {faqs.map((faq, index) => (
+              <details key={faq.question} className="group py-5">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-5 text-sm font-medium text-white">
+                  <span>{faq.question}</span>
+                  <span className="text-electric-blue transition-transform group-open:rotate-45">
+                    +
+                  </span>
+                </summary>
+
+                <p className="mt-3 max-w-2xl pr-8 text-sm leading-relaxed text-matte-silver">
+                  {faq.answer}
+                </p>
+              </details>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* ===== CTA ===== */}
-      <section className="py-14 md:py-20 bg-surface-secondary relative">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(37,99,235,0.05)_0%,transparent_70%)] pointer-events-none" />
-        <div className="relative max-w-2xl mx-auto px-6 text-center">
+      {/* CTA */}
+      <section className="relative overflow-hidden bg-surface-secondary py-20 md:py-28">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(37,99,235,0.08)_0%,transparent_70%)]" />
+
+        <div className="relative mx-auto max-w-3xl px-6 text-center">
           <AnimatedSection>
-            <h2 className="text-2xl md:text-4xl font-bold text-white">
-              Ready to Make Your Product Feel Premium?
-            </h2>
-            <p className="text-matte-silver mt-4 text-sm md:text-base leading-relaxed">
-              Whether you&apos;re launching a new product or scaling your content production, we&apos;ll help you create visuals that increase perceived value and drive results.
+            <p className="text-xs font-medium uppercase tracking-[0.2em] text-electric-blue">
+              Start a Project
             </p>
-            <div className="flex flex-wrap items-center justify-center gap-4 mt-6">
-              <a
-                href={siteConfig.calendlyUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-electric-blue text-white px-6 py-3 rounded-full font-medium text-sm hover:bg-electric-blue/90 transition-colors"
-              >
-                Book a Discovery Call
-              </a>
-              <button
-                onClick={() => navigate('contact')}
-                className="border border-white/20 text-white px-6 py-3 rounded-full font-medium text-sm hover:bg-white/5 transition-colors inline-flex items-center gap-2"
-              >
-                Contact Us <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
+
+            <h2 className="mt-3 text-3xl font-bold tracking-tight text-white md:text-5xl">
+              Have an idea?
+            </h2>
+
+            <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-matte-silver md:text-base">
+              Let&apos;s turn it into something worth seeing.
+            </p>
+          </AnimatedSection>
+
+          <AnimatedSection delay={0.15} className="mt-7">
+            <a
+              href={siteConfig.calendlyUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-full bg-electric-blue px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-electric-blue/90"
+            >
+              Book a Call
+              <ArrowRight className="h-4 w-4" />
+            </a>
           </AnimatedSection>
         </div>
       </section>
